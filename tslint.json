@@ -28,10 +28,10 @@
       {
         "singleline": "never",
         "multiline": {
-          "objects": "ignore",
-          "arrays": "always",
+          "objects": "never",
+          "arrays": "never",
           "functions": "never",
-          "typeLiterals": "ignore"
+          "typeLiterals": "never"
         }
       }
     ],

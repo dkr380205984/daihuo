@@ -65,13 +65,19 @@ export default class Login extends Vue {
     require('../assets/image/login/rotation1.jpg'),
     require('../assets/image/login/rotation2.jpg'),
     require('../assets/image/login/rotation3.jpg'),
-    require('../assets/image/login/rotation4.png'),
+    require('../assets/image/login/rotation4.png')
   ]
-  telephone: string | number = ''
-  password: string | number = ''
+  telephone: string = ''
+  password: string = ''
   remPsd: boolean = false
-  goLogin(): void {}
-  goRegister(): void {}
+  goLogin(): void {
+    this.$router.push('/index')
+  }
+  goRegister(): void {
+    this.$message.warning({
+      message: '注册功能暂不开放'
+    })
+  }
 }
 </script>
 <style lang="less" scoped>
