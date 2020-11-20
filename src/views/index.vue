@@ -4,7 +4,9 @@
       <!-- 导航栏 -->
       <div class="navMain">
         <div class="clientInfo">
-          <div class="icon">图标</div>
+          <div class="icon">
+            <img src="../assets/image/noPic.jpg" />
+          </div>
           <div class="sampleName">简写</div>
           <div class="allName">全程长一点</div>
         </div>
@@ -27,13 +29,13 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-interface navInfo {
+interface NavInfo {
   name: string
   icon?: string
 }
 @Component
 export default class Index extends Vue {
-  navList: Array<navInfo> = []
+  navList: NavInfo[] = []
   created() {
     this.navList = [
       { name: '首页', icon: '首页图标' },
