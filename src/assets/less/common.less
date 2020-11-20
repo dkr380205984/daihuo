@@ -1,16 +1,143 @@
 
+// 常用颜色
 @blue:#1A95FF;
 @red:#F5222D;
 @orange:#E6A23C;
 @green:#01B48C;
+@gray:#F0F2F5;
+// 背景色和边框色
+@bgGray:#F7F8FA;
+@borderColor:#E6E6E6;
+// 字体颜色
 @font85:rgba(0,0,0,0.85);
 @font65:rgba(0,0,0,0.65);
 @font45:rgba(0,0,0,0.45);
 @font25:rgba(0,0,0,0.25);
+// 字体大小
 @fontBig:16px;
-
 @fontMiddle:14px;
 @fontSmall:12px;
+
+.listCtnNoRepeat{
+  width: 100%;
+  height: 100%;
+  .header{
+    height: 80px;
+    position: relative;
+    background: #FFF;
+    .title{
+      display: inline-block;
+      line-height: 80px;
+      margin-left: 24px;
+      font-size: 22px;
+    }
+    .btnCtn{
+      float: right;
+      margin-right: 24px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+  }
+}
+
+ // 按钮样式
+ .btn{
+  padding: 0 23px;
+  margin-left: 16px;
+  cursor: pointer;
+  &.noMargin{
+    margin: 0;
+  }
+  &.noBorder{
+    height:32px;
+    line-height: 32px;
+    color:@blue;
+  }
+  &.btnBlue{
+    height:32px;
+    line-height: 32px;
+    background: @blue;
+    color: #fff;
+    border-radius: 4px;
+  }
+  &.btnOrange{
+    height:32px;
+    line-height: 32px;
+    background: @orange;
+    color: #fff;
+    border-radius: 4px;
+  }
+  &.btnRed{
+    height:32px;
+    line-height: 32px;
+    background: @red;
+    color: #fff;
+    border-radius: 4px;
+  }
+  &.btnGreen{
+    height:32px;
+    line-height: 32px;
+    background: @green;
+    color: #fff;
+    border-radius: 4px;
+  }
+  &.btnGray{
+    color: @font65;
+    border: 1px solid #D9D9D9;
+    line-height: 30px;
+    border-radius: 4px;
+  }
+  &.btnWhiteBlue{
+    color: @blue;
+    border: 1px solid @blue;
+    line-height: 30px;
+    border-radius: 4px;
+  }
+  &.btnWhiteRed{
+    color: @red;
+    border: 1px solid @red;
+    line-height: 30px;
+    border-radius: 4px;
+  }
+  &.btnDashed{
+    display: flex;
+    width: 100%;
+    border: 1px dashed #D9D9D9;
+    box-sizing: border-box;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    &:hover{
+      color: @blue;
+      border-color: @blue;
+    }
+    &>.btn{
+      flex: 1;
+      margin: 0;
+      text-align: center;
+      height: 100%;
+      box-sizing: border-box;
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// 老样式
 .contentMain{
   width: 100%;
   margin-top: 24px;

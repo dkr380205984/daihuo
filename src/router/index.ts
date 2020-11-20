@@ -1,7 +1,7 @@
-import Vue from 'vue';
-import VueRouter, { RouteConfig } from 'vue-router';
+import Vue from 'vue'
+import VueRouter, { RouteConfig } from 'vue-router'
 
-Vue.use(VueRouter);
+Vue.use(VueRouter)
 
 const routes: RouteConfig[] = [{
   path: '/',
@@ -13,13 +13,18 @@ const routes: RouteConfig[] = [{
 }, {
   path: '/index',
   name: 'index',
-  component: () => import('../views/index.vue')
-}];
+  component: () => import('../views/index.vue'),
+  children: [{
+    path: '/css/list',
+    name: 'cssList',
+    component: () => import('../views/css/list.vue')
+  }]
+}]
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
-});
+})
 
-export default router;
+export default router

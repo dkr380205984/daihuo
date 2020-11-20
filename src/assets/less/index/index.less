@@ -1,31 +1,83 @@
 #index{
   width: 100%;
   height: 100%;
+  background: #F7F8FA;
   .indexMain{
-    width: 1366px;
+    width: 1440px;
     margin: auto;
     height: 100%;
     display: flex;
+    background: #F7F8FA;
     .navMain{
       width:200px;
       height: 100%;
-      background: rebeccapurple;
+      background: #ffffff;
+      background-image: url('../../image/index/navBack3.jpg');
+      background-repeat: no-repeat;
+      background-size:100% 100%;
       .clientInfo{
         margin: 30px 12px;
         .icon{
-          width: 42px;
-          height: 42px;
+          width: 50px;
+          height: 50px;
           margin: auto;
+          border-radius: 50%;
+          overflow: hidden;
           img{
             width: 100%;
             height: 100%;
+          }
+        }
+        .sampleName{
+          text-align: center;
+          font-size: 16px;
+          font-weight: 600;
+          margin: 18px 0 12px;
+          color: #333333;
+        }
+        .allName{
+          text-align: center;
+          font-size: 14px;
+          color: #999999;
+        }
+      }
+      .navCtn{
+        margin-top: 36px;
+        .nav{
+          line-height: 50px;
+          padding-left: 32px;
+          color: #333333;
+          cursor: pointer;
+          .icon{
+            width: 26px;
+            height: 26px;
+            font-size: 0;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 12px;
+            img{
+              width: 100%;
+              height: 100%;
+            }
+          }
+          .name{
+            display: inline-block;
+            vertical-align: middle;
+            font-size: 14px;
+          }
+          &:hover{
+            color: #1a95ff;
+          }
+          &.active{
+            color: #1a95ff;
+            font-weight: bold;
           }
         }
       }
     }
     .userMain{
       flex: 1;
-      background: yellowgreen;
     }
   }
 }

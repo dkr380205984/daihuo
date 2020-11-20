@@ -1,5 +1,5 @@
 <template>
-  <div class="createCtn"></div>
+  <div class="createCtnNoRepeat"></div>
 </template>
 
 <script>
