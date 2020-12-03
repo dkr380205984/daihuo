@@ -44,7 +44,7 @@ axios.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-function get(url: string, params: object) {
+function get(url: string, params?: object) {
   params = typeof (params) === 'object' ? params : {}
   const response = axios({
     method: 'get',
@@ -54,7 +54,7 @@ function get(url: string, params: object) {
   return Promise.resolve(response)
 }
 
-function post(url: any, params: object | string, contentType: string, responseType: any) {
+function post(url: any, params?: object | string, contentType?: string, responseType?: any) {
   params = typeof (params) === 'object' ? params : {}
   // 设置请求头
   let headers = {}

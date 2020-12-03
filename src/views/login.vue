@@ -58,27 +58,54 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-@Component
-export default class Login extends Vue {
-  picArr: any[] = [
-    require('../assets/image/login/rotation1.jpg'),
-    require('../assets/image/login/rotation2.jpg'),
-    require('../assets/image/login/rotation3.jpg'),
-    require('../assets/image/login/rotation4.png')
-  ]
-  telephone: string = ''
-  password: string = ''
-  remPsd: boolean = false
-  goLogin(): void {
-    this.$router.push('/index')
+import { Vue } from 'vue-property-decorator'
+import { login } from '@/assets/js/api'
+export default Vue.extend({
+  data() {
+    return {
+      picArr: [
+        require('../assets/image/login/rotation1.jpg'),
+        require('../assets/image/login/rotation2.jpg'),
+        require('../assets/image/login/rotation3.jpg'),
+        require('../assets/image/login/rotation4.png')
+      ],
+      telephone: window.localStorage.getItem('dhUsername') || '',
+      password: window.localStorage.getItem('dhPassword') || '',
+      remPsd: false
+    }
+  },
+  methods: {
+    goLogin(): void {
+      login({
+        user_name: this.telephone,
+        password: this.password
+      }).then((res) => {
+        if (res.data.code === 200) {
+          window.sessionStorage.setItem('token', res.data.data.access_token)
+          window.sessionStorage.setItem('token_type', res.data.data.token_type)
+          window.localStorage.setItem('dhUsername', this.telephone)
+          if (this.remPsd) {
+            window.localStorage.setItem('dhPassword', this.password)
+          } else {
+            window.localStorage.setItem('dhPassword', '')
+          }
+          this.$message.success('登录成功')
+          this.$router.push('/setting/main')
+        } else {
+          this.$message.error({
+            message: res.data.message
+          })
+          this.password = ''
+        }
+      })
+    },
+    goRegister(): void {
+      this.$message.warning({
+        message: '注册功能暂不开放'
+      })
+    }
   }
-  goRegister(): void {
-    this.$message.warning({
-      message: '注册功能暂不开放'
-    })
-  }
-}
+})
 </script>
 <style lang="less" scoped>
 @import '~@/assets/less/login/login.less';

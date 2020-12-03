@@ -18,6 +18,26 @@ const routes: RouteConfig[] = [{
     path: '/css/list',
     name: 'cssList',
     component: () => import('../views/css/list.vue')
+  }, {
+    path: '/css/detail',
+    name: 'cssDetail',
+    component: () => import('../views/css/detail.vue')
+  }, {
+    path: '/css/create',
+    name: 'cssCreate',
+    component: () => import('../views/css/create.vue')
+  }, {
+    path: '/product/list',
+    name: 'productList',
+    component: () => import('../views/product/list.vue')
+  }, {
+    path: '/product/create',
+    name: 'productCreate',
+    component: () => import('../views/product/create.vue')
+  }, {
+    path: '/setting/main',
+    name: 'settingMain',
+    component: () => import('../views/setting/main.vue')
   }]
 }]
 

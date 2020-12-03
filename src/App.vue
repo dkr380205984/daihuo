@@ -4,6 +4,7 @@
   </div>
 </template>
 <style lang="less">
+@import '~@/assets/less/element.less';
 html,
 body {
   margin: 0;

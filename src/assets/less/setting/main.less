@@ -1,0 +1,105 @@
+@import './../common.less';
+.sepcialBtn{
+  margin-left: 0;
+  margin-top: 20px;
+  display: inline-block;
+}
+.firstModuleCtn{
+  margin-top: 20px;
+  .moduleCtn{
+    position: relative;
+    margin-bottom: 15px;
+    background: #f5f5f5;
+    padding: 15px;
+    .deleteIcon{
+      position: absolute;
+      right:-5px;
+      top: -5px;
+      width: 20px;
+      height: 20px;
+      background: @red;
+      color: #fff;
+      border-radius: 50%;
+      line-height: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+  }
+  .inputCtn{
+    min-height: 32px;
+    height: auto!important;
+    .el-input{
+      height: 32px;
+    }
+  }
+  .onceTag{
+    display: inline-block;
+    height: 32px;
+    position: relative;
+    vertical-align: middle;
+    margin-right: 12px;
+    margin-bottom: 8px;
+    &.tag{
+      background: @orange;
+      color: #fff;
+      font-size: @fontMiddle;
+      line-height: 32px;
+      border-radius: 4px;
+      padding: 0 12px;
+    }
+    &:hover{
+      .deleteIcon{
+        display: block;
+      }
+    }
+    .deleteIcon{
+      position: absolute;
+      right: -5px;
+      top: -5px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      color: #fff;
+      background: @red;
+      font-size: 12px;
+      line-height: 16px;
+      text-align: center;
+      display: none;
+    }
+  }
+  .plusBtn{
+    width: 32px;
+    height: 32px;
+    line-height: 30px;
+    box-sizing: border-box;
+    display: inline-block;
+    border:1px solid;
+    text-align: center;
+    color: #DCDFE6;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 12px;
+    margin-bottom: 8px;
+    vertical-align: middle;
+    &:hover{
+      color: @blue;
+    }
+  }
+  .sepcialBtn2{
+    display: block;
+    margin-left: 0;
+    margin-top: 15px;
+    width: 6em;
+    text-align: center;
+  }
+  .secondModuleCtn{
+    margin-top: 20px;
+    .moduleCtn{
+      position: relative;
+      margin-bottom: 15px;
+      background:rgba(230, 233, 237, 0.64);
+      padding: 15px;
+    }
+  }
+}
