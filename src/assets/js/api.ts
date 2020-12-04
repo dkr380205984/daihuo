@@ -3,11 +3,14 @@ const baseUrl = '/api'
 
 // 列表公共信息
 interface ListParam {
-  page?: number
-  limit?: number
+  page: number
+  limit: number
   [propName: string]: any
 }
-
+interface DeatailParam {
+  id: number | string,
+  [propName: string]: any
+}
 // 登录
 const login = (params: any) => http.post(`${baseUrl}/auth/login`, params, 'application/json')
 
@@ -41,7 +44,10 @@ interface ProductSave {
   description: string
 }
 const product = {
-  save: (params: ProductSave) => http.post(`${baseUrl}/product/save`, params, 'application/json')
+  save: (params: ProductSave) => http.post(`${baseUrl}/product/save`, params, 'application/json'),
+  list: (params: ListParam) => http.get(`${baseUrl}/product/lists`, params),
+  detail: (params: DeatailParam) => http.get(`${baseUrl}/product/detail`, params),
+  delete: (params: DeatailParam) => http.post(`${baseUrl}/product/delete`, params, 'application/json')
 }
 export {
   product,

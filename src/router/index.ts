@@ -35,6 +35,10 @@ const routes: RouteConfig[] = [{
     name: 'productCreate',
     component: () => import('../views/product/create.vue')
   }, {
+    path: '/product/update/:id',
+    name: 'productUpdate',
+    component: () => import('../views/product/update.vue')
+  }, {
     path: '/setting/main',
     name: 'settingMain',
     component: () => import('../views/setting/main.vue')

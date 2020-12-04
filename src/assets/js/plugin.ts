@@ -38,4 +38,9 @@ const plugin = {
     return newData
   }
 }
-export default plugin
+export default {
+  install: (Vue: any) => {
+    Vue.prototype.$clone = plugin.clone
+    Vue.prototype.$getDataType = plugin.getDataType
+  }
+}

@@ -1,8 +1,23 @@
 @import './../common.less';
 #productCreate{
+  .tableCtn{
+    max-width: 998px;
+    display: flex;
+  }
   .normalTb{
+    width: auto;
+    .trow{
+      justify-content: flex-start;
+      padding-right: auto;
+    }
     .elDom{
       height: 32px;
     }
+    .min120{
+      min-width: 110px;
+    }
+  }
+  .overHeight{
+    overflow: auto;
   }
 }

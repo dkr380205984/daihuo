@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Vue } from 'vue-property-decorator'
 // 导航栏
 interface NavInfo {
   name: string
@@ -41,9 +41,12 @@ interface NavInfo {
   hoverIcon?: string
   active?: boolean
 }
-@Component
-export default class Index extends Vue {
-  navList: NavInfo[] = []
+export default Vue.extend({
+  data(): { navList: NavInfo[]; [propName: string]: any } {
+    return {
+      navList: []
+    }
+  },
   created() {
     this.navList = [
       { name: '首页', url: '/index', active: true },
@@ -51,13 +54,14 @@ export default class Index extends Vue {
       { name: '详情通用样式', url: '/css/detail' },
       { name: '添加通用样式', url: '/css/create' },
       { name: '产品管理', url: '/product/list' },
+      { name: '库存管理', url: '/product/list' },
       { name: '订单管理', url: '/index' },
       { name: '主播管理', url: '/index' },
       { name: '个人中心', url: '/index' },
       { name: '系统设置', url: '/setting/main' }
     ]
   }
-}
+})
 </script>
 <style lang="less" scoped>
 @import '~@/assets/less/index/index.less';

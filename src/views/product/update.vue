@@ -2,7 +2,7 @@
   <div id="productCreate"
     class="createCtnNoRepeat">
     <div class="header">
-      <div class="title">产品添加</div>
+      <div class="title">产品修改</div>
     </div>
     <div class="moduleCtn">
       <div class="module">
@@ -33,7 +33,7 @@
               <div class="eldom">
                 <el-select placeholder="请选择产品品类"
                   v-model="product_type"
-                  @change="renderDom">
+                  disabled>
                   <el-option v-for="item in type_list"
                     :key="item.id"
                     :label="item.name"
@@ -84,15 +84,7 @@
       v-if="product_type">
       <div class="module">
         <div class="titleCtn">
-          <div class="title">详细信息
-            <el-tooltip class="item"
-              effect="dark"
-              content="注意：修改非表格信息会重置表格的单价、库存信息，请务必在填写完其他信息后再填写单价和库存信息"
-              placement="top">
-              <i style="color:#ccc"
-                class="el-icon-question"></i>
-            </el-tooltip>
-          </div>
+          <div class="title">详细信息</div>
         </div>
         <div class="contentCtn">
           <div class="lineCtn"
@@ -201,7 +193,6 @@
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -214,7 +205,7 @@
           <div class="btn btnGray"
             @click="$router.go(-1)">返回</div>
           <div class="btn btnBlue"
-            @click="savePro">提交</div>
+            @click="savePro">修改</div>
         </div>
       </div>
     </div>
@@ -230,6 +221,7 @@ interface SkuInfo {
   store: string
   sku_info: string
   image_url: string
+  sku_code?: string
 }
 interface ProductForm {
   name: string
@@ -242,10 +234,17 @@ interface ProductForm {
   description: string
   min_price: number
   max_price: number
+  id?: string | number
 }
 export default Vue.extend({
   data(): {
-    table_data: { header: any[]; normal_content: any[]; mix_content: any[]; render_content: any[] }
+    table_data: {
+      header: any[]
+      normal_content: any[]
+      mix_content: any[]
+      render_content: any[]
+      old_render_content: any[]
+    }
     [propName: string]: any
   } {
     return {
@@ -264,49 +263,12 @@ export default Vue.extend({
         header: [], // 存放表头
         normal_content: [], // 存放非组合项
         mix_content: [], // 存放组合项
-        render_content: [] // 需要渲染的表格,实时计算
+        render_content: [], // 需要渲染的表格,实时计算
+        old_render_content: [] // 保留一份原始数据用于匹配价格，库存，sku信息
       }
     }
   },
   methods: {
-    // 选取品类初始化数据
-    renderDom(id: number): void {
-      const finded: any = this.type_list.find((itemFind: { id: number; category_menu: string }) => itemFind.id === id)
-      this.render_data = JSON.parse(finded.category_menu)
-      this.render_data.forEach((item: any) => {
-        if (item.is_combine) {
-          if (item.category_menu.length > 0) {
-            item.keyArr = {}
-            item.inputValue = []
-            const arr: any[] = []
-            item.category_menu.forEach((itemChild: any) => {
-              arr.push(itemChild.name)
-            })
-            arr.forEach((itemKey: string) => {
-              item.keyArr[itemKey] = ''
-            })
-            item.inputValue.push(this.$clone(item.keyArr))
-          } else {
-            item.inputValue = ['']
-          }
-        } else {
-          if (item.category_menu.length > 0) {
-            item.keyArr = []
-            item.inputValue = {}
-            item.category_menu.forEach((itemChild: any) => {
-              item.keyArr.push(itemChild.name)
-            })
-            item.keyArr.forEach((itemKey: string) => {
-              item.inputValue[itemKey] = ''
-            })
-          } else {
-            item.inputValue = ''
-          }
-        }
-      })
-      // 基础数据整理完毕,开始渲染表格
-      this.renderTable(true)
-    },
     renderTable(first?: boolean): void {
       if (first === true) {
         // 第一步,把表格标题找出来,并确定组合项,必填项
@@ -346,9 +308,15 @@ export default Vue.extend({
             name: '图片'
           }
         ])
+        this.table_data.header.unshift({
+          firstName: 'sku编码',
+          is_combine: false,
+          is_required: false,
+          name: 'sku编码'
+        })
         // 第二步,想办法把render_data的输入信息和table_data联系起来,用key来保存render_data的索引
         // 因为render_data一旦生成,他的数组特性保证了数据顺序不变,所以table_data只需要寻址一次就可以复用这个索引
-        // 注意，单价/库存/sku编码信息的索引值为-1
+        // 注意，单价/库存的索引值为-1
         this.table_data.mix_content = this.table_data.header
           .filter((item) => item.is_combine)
           .map((item) => {
@@ -417,6 +385,28 @@ export default Vue.extend({
             }
           } else {
             itemRender[item.name] = ''
+          }
+        })
+      })
+      this.getOldData()
+      this.$forceUpdate()
+    },
+    // 由于渲染生成表的时候会重置填写项，所以我们将填写项的信息通过匹配旧值的方式匹配回去
+    getOldData(): void {
+      this.table_data.render_content.forEach((itemNew) => {
+        this.table_data.old_render_content.forEach((itemOld) => {
+          let ifEqual = true
+          for (const key of Object.keys(itemNew)) {
+            if (key !== '单价' && key !== 'sku编码' && key !== '图片' && key !== '库存数') {
+              if (itemNew[key] !== itemOld[key]) {
+                ifEqual = false
+              }
+            }
+          }
+          if (ifEqual) {
+            for (const key of Object.keys(itemNew)) {
+              itemNew[key] = itemOld[key]
+            }
           }
         })
       })
@@ -503,6 +493,7 @@ export default Vue.extend({
       const price = '单价'
       const stroe = '库存数'
       const formData: ProductForm = {
+        id: this.$route.params.id,
         name: this.product_name,
         category_id: this.product_type,
         category_info: JSON.stringify(this.render_data), // 备份render_data，在修改页还可以用，不然要根据table_data反刍一个render_data出来，太恶心了
@@ -530,7 +521,7 @@ export default Vue.extend({
       }
       product.save(formData).then((res: any) => {
         if (res.data.status) {
-          this.$message.success('添加成功')
+          this.$message.success('修改成功')
         }
       })
     },
@@ -540,11 +531,26 @@ export default Vue.extend({
       } else {
         return name.join(',')
       }
+    },
+    // 初始化数据
+    getInfo(data: ProductForm) {
+      this.product_name = data.name
+      this.product_type = data.category_id
+      this.render_data = JSON.parse(data.category_info)
+      this.renderTable(true)
+      this.table_data.render_content = data.sku_info.map((item) => {
+        const obj = JSON.parse(item.sku_info)
+        const skuCode = 'sku编码'
+        obj[skuCode] = item.sku_code
+        return obj
+      })
+      this.table_data.old_render_content = this.$clone(this.table_data.render_content)
     }
   },
   mounted() {
-    proType.list().then((res) => {
-      this.type_list = res.data.data
+    Promise.all([proType.list(), product.detail({ id: this.$route.params.id })]).then((res) => {
+      this.type_list = res[0].data.data
+      this.getInfo(res[1].data.data)
     })
   }
 })

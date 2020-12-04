@@ -7,14 +7,16 @@ import 'element-ui/lib/theme-chalk/index.css';
 import VueParticles from 'vue-particles';
 import plugin from '@/assets/js/plugin'
 
-Vue.prototype.$clone = plugin.clone
+Vue.use(plugin)
 Vue.config.productionTip = false;
 Vue.use(VueParticles)
 Vue.use(ElementUI)
 
+// 注册公共方法后需要声明
 declare module 'vue/types/vue' {
   interface Vue {
-    $clone: any
+    $clone: any,
+    $getDataType: any
   }
 }
 
