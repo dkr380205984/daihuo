@@ -71,7 +71,7 @@ export default Vue.extend({
       ],
       telephone: window.localStorage.getItem('dhUsername') || '',
       password: window.localStorage.getItem('dhPassword') || '',
-      remPsd: false
+      remPsd: true
     }
   },
   methods: {

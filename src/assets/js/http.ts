@@ -60,6 +60,11 @@ function post(url: any, params?: object | string, contentType?: string, response
   let headers = {}
   if (contentType && contentType === 'application/json') {
     headers = { 'Content-Type': 'application/json' }
+  } else if (contentType && contentType === 'form-data') {
+    headers = {
+      'Content-Type': 'multipart/form-data',
+      'processData': false
+    }
   } else {
     params = qs.stringify(params)
     headers = { 'Content-Type': 'application/x-www-form-urlencoded' }

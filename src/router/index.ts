@@ -39,6 +39,22 @@ const routes: RouteConfig[] = [{
     name: 'productUpdate',
     component: () => import('../views/product/update.vue')
   }, {
+    path: '/product/detail/:id',
+    name: 'productDetail',
+    component: () => import('../views/product/detail.vue')
+  }, {
+    path: '/order/list',
+    name: 'orderList',
+    component: () => import('../views/order/list.vue')
+  }, {
+    path: '/stock/list',
+    name: 'stockList',
+    component: () => import('../views/stock/list.vue')
+  }, {
+    path: '/setting/category',
+    name: 'settingCategory',
+    component: () => import('../views/setting/category.vue')
+  }, {
     path: '/setting/main',
     name: 'settingMain',
     component: () => import('../views/setting/main.vue')

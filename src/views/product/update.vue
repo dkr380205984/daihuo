@@ -32,8 +32,7 @@
             <div class="line">
               <div class="eldom">
                 <el-select placeholder="请选择产品品类"
-                  v-model="product_type"
-                  disabled>
+                  v-model="product_type">
                   <el-option v-for="item in type_list"
                     :key="item.id"
                     :label="item.name"
@@ -67,6 +66,28 @@
             </div>
           </div>
           <div class="lineCtn">
+            <div class="label">图片信息：</div>
+            <div class="line">
+              <el-upload class="upload"
+                action="https://upload.qiniup.com/"
+                accept="image/jpeg,image/gif,image/png,image/bmp"
+                :before-upload="beforeAvatarUpload"
+                :data="post_data"
+                :file-list="product_image"
+                :on-success="successFile"
+                :before-remove="beforeRemove"
+                ref="uploada"
+                list-type="picture">
+                <div class="uploadBtn">
+                  <i class="el-icon-upload"></i>
+                  <span style="margin-left:8px">点击上传图片</span>
+                </div>
+                <div slot="tip"
+                  class="el-upload__tip">只能上传jpg/png图片文件，且不超过10M</div>
+              </el-upload>
+            </div>
+          </div>
+          <div class="lineCtn">
             <div class="label">其他信息：</div>
             <div class="line">
               <div class="eldom overHeight">
@@ -84,7 +105,15 @@
       v-if="product_type">
       <div class="module">
         <div class="titleCtn">
-          <div class="title">详细信息</div>
+          <div class="title">详细信息
+            <el-tooltip class="item"
+              effect="dark"
+              content="注意：修改非表格信息会重置表格的单价信息，请务必在填写完其他信息后再填写单价信息"
+              placement="top">
+              <i style="color:#ccc"
+                class="el-icon-question"></i>
+            </el-tooltip>
+          </div>
         </div>
         <div class="contentCtn">
           <div class="lineCtn"
@@ -98,13 +127,15 @@
                 :key="indexOnce">
                 <div class="line oneLine"
                   v-if="item.category_menu.length>0">
-                  <el-input v-for="(itemChild,indexChild) in item.category_menu"
+                  <el-autocomplete v-for="(itemChild,indexChild) in item.category_menu"
                     :key="indexChild"
                     class="eldom"
                     :placeholder="'请输入'+itemChild.name"
                     v-model="itemOnce[itemChild.name]"
+                    :fetch-suggestions="function(str,callback){querySearch(str,callback,itemChild.commonUse)}"
+                    @select="renderTable"
                     @input="$forceUpdate()"
-                    @change="renderTable"></el-input>
+                    @change="renderTable"></el-autocomplete>
                   <div class="oprBtn add"
                     v-if="indexOnce===0"
                     @click="addItem(item.inputValue,$clone(item.keyArr))">
@@ -119,10 +150,12 @@
                 <div class="line"
                   v-else>
                   <div class="eldom">
-                    <el-input :placeholder="'请输入'+item.name"
+                    <el-autocomplete :placeholder="'请输入'+item.name"
                       v-model="item.inputValue[indexOnce]"
+                      :fetch-suggestions="function(str,callback){querySearch(str,callback,item.commonUse)}"
+                      @select="renderTable"
                       @input="$forceUpdate()"
-                      @change="renderTable"></el-input>
+                      @change="renderTable"></el-autocomplete>
                     <div class="oprBtn add"
                       v-if="indexOnce===0"
                       @click="addItem(item.inputValue,'')">
@@ -141,21 +174,25 @@
             <template v-else>
               <div class="line oneLine"
                 v-if="item.category_menu.length>0">
-                <el-input v-for="(itemChild,indexChild) in item.category_menu"
+                <el-autocomplete v-for="(itemChild,indexChild) in item.category_menu"
                   :key="indexChild"
                   class="eldom"
                   :placeholder="'请输入'+itemChild.name"
                   v-model="item.inputValue[itemChild.name]"
+                  :fetch-suggestions="function(str,callback){querySearch(str,callback,itemChild.commonUse)}"
+                  @select="renderTable"
                   @input="$forceUpdate()"
-                  @change="renderTable"></el-input>
+                  @change="renderTable"></el-autocomplete>
               </div>
               <div class="line"
                 v-else>
                 <div class="eldom">
-                  <el-input :placeholder="'请输入'+item.name"
+                  <el-autocomplete :placeholder="'请输入'+item.name"
                     v-model="item.inputValue"
                     @input="$forceUpdate()"
-                    @change="renderTable"></el-input>
+                    :fetch-suggestions="function(str,callback){querySearch(str,callback,item.commonUse)}"
+                    @select="renderTable"
+                    @change="renderTable"></el-autocomplete>
                 </div>
               </div>
             </template>
@@ -183,11 +220,25 @@
                           <span v-if="item.firstName"
                             :style="{'color':item.is_required &&!itemRow[filterName(item.name)]?'#F5222D':''}">{{itemRow[filterName(item.name)] || (item.is_required ?'未填必填项':'非必填')}}</span>
                           <el-input class="elDom"
-                            v-if="!item.firstName"
+                            v-if="!item.firstName && item.name!=='图片'"
                             v-model="itemRow[filterName(item.name)]"
                             @input="$forceUpdate()"
                             :placeholder="item.name">
                           </el-input>
+                          <el-upload v-if="!item.firstName && item.name==='图片'"
+                            class="avatar-uploader"
+                            action="https://upload.qiniup.com/"
+                            accept="image/jpeg,image/gif,image/png,image/bmp"
+                            :data="post_data"
+                            :show-file-list="false"
+                            :on-success="function (res, file) { return handleImgSuccess(res, file, itemRow,item.name)}"
+                            :before-upload="beforeAvatarUpload">
+                            <img v-if="itemRow[filterName(item.name)]"
+                              :src="itemRow[filterName(item.name)]"
+                              class="avatar">
+                            <i v-else
+                              class="el-icon-plus avatar-uploader-icon"></i>
+                          </el-upload>
                         </div>
                       </div>
                     </div>
@@ -214,11 +265,10 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { proType, product } from '@/assets/js/api'
+import { proType, product, getToken } from '@/assets/js/api'
 interface SkuInfo {
   sku_id: string | number
   price: number
-  store: string
   sku_info: string
   image_url: string
   sku_code?: string
@@ -230,7 +280,7 @@ interface ProductForm {
   sku_info: SkuInfo[]
   client_id: number | string
   brand_id: number | string
-  images: string[]
+  images: any[]
   description: string
   min_price: number
   max_price: number
@@ -248,6 +298,8 @@ export default Vue.extend({
     [propName: string]: any
   } {
     return {
+      file_arr: [],
+      post_data: { token: '' },
       product_name: '',
       product_type: '',
       type_list: [],
@@ -296,11 +348,6 @@ export default Vue.extend({
             is_combine: false,
             is_required: true,
             name: '单价'
-          },
-          {
-            is_combine: false,
-            is_required: true,
-            name: '库存数'
           },
           {
             is_combine: false,
@@ -392,12 +439,16 @@ export default Vue.extend({
       this.$forceUpdate()
     },
     // 由于渲染生成表的时候会重置填写项，所以我们将填写项的信息通过匹配旧值的方式匹配回去
-    getOldData(): void {
+    getOldData(justSave?: boolean): void {
+      if (justSave === true) {
+        this.table_data.old_render_content = this.$clone(this.table_data.render_content)
+        return
+      }
       this.table_data.render_content.forEach((itemNew) => {
         this.table_data.old_render_content.forEach((itemOld) => {
           let ifEqual = true
           for (const key of Object.keys(itemNew)) {
-            if (key !== '单价' && key !== 'sku编码' && key !== '图片' && key !== '库存数') {
+            if (key !== '单价' && key !== 'sku编码' && key !== '图片') {
               if (itemNew[key] !== itemOld[key]) {
                 ifEqual = false
               }
@@ -469,12 +520,9 @@ export default Vue.extend({
         })
         // 修复tslint不允许字符串访问对象的脑瘫设定
         const price = '单价'
-        const stroe = '库存数'
         this.table_data.render_content.forEach((item: any) => {
           if (!item[price] && Number(item[price] !== 0)) {
             msg = '单价未填写，单价可填0'
-          } else if (!item[stroe] && Number(item[price] !== 0)) {
-            msg = '库存数未填写，库存数可填0'
           }
         })
       }
@@ -491,7 +539,7 @@ export default Vue.extend({
       }
       // 修复tslint不允许字符串访问对象的脑瘫设定
       const price = '单价'
-      const stroe = '库存数'
+      const image = '图片'
       const formData: ProductForm = {
         id: this.$route.params.id,
         name: this.product_name,
@@ -502,9 +550,8 @@ export default Vue.extend({
             return {
               sku_id: index >= 9 ? index + 1 : '0' + (index + 1),
               price: item[price],
-              store: item[stroe],
               sku_info: JSON.stringify(item),
-              image_url: ''
+              image_url: item[image]
             }
           }
         ),
@@ -516,7 +563,7 @@ export default Vue.extend({
         )[0][price],
         client_id: this.from_client || 1,
         brand_id: this.product_brand || 1,
-        images: [],
+        images: this.product_image.map((item: any) => item.url),
         description: this.desc
       }
       product.save(formData).then((res: any) => {
@@ -525,6 +572,83 @@ export default Vue.extend({
         }
       })
     },
+    handleImgSuccess(res: any, file: any, itemRow: any, name: any) {
+      console.log(itemRow, name)
+      itemRow[name] = 'https://zhihui.tlkrzf.com/' + res.key
+      this.$forceUpdate()
+    },
+    beforeAvatarUpload(file: any) {
+      const fileName = file.name.lastIndexOf('.') // 取到文件名开始到最后一个点的长度
+      const fileNameLength = file.name.length // 取到文件名长度
+      const fileFormat = file.name.substring(fileName + 1, fileNameLength) // 截
+      this.post_data.key = Date.parse(new Date().toString()) + '.' + fileFormat
+      const isJPG = file.type === 'image/jpeg'
+      const isPNG = file.type === 'image/png'
+      const isLt2M = file.size / 1024 / 1024 < 10
+      if (!isJPG && !isPNG) {
+        this.$message.error('图片只能是 JPG/PNG 格式!')
+        return false
+      }
+      if (!isLt2M) {
+        this.$message.error('图片大小不能超过 10MB!')
+        return false
+      }
+    },
+    successFile(response: any, file: any, fileList: any[]) {
+      this.product_image.push({ id: null, url: 'https://zhihui.tlkrzf.com/' + response.key })
+    },
+    beforeRemove(file: any, fileList: any[]) {
+      let deleteIndex = 0
+      fileList.forEach((item, index) => {
+        if (file.response) {
+          if (item.response && item.response.key === file.response.key) {
+            deleteIndex = index
+          }
+        } else {
+          if (item.url === file.url) {
+            deleteIndex = index
+          }
+        }
+      })
+      fileList.splice(deleteIndex, 1)
+      this.product_image.splice(deleteIndex, 1)
+      this.$forceUpdate()
+      this.$message({
+        type: 'success',
+        message: '删除成功!'
+      })
+      // return false 禁用自带的删除功能
+      return false
+    },
+    //  beforeRemove(file: any, fileList: any[]) {
+    //   console.log(file, fileList)
+    //   let deleteIndex2 = 0
+    //   let deleteIndex3 = 0
+    //   if (file.response) {
+    //     this.file_arr.forEach((item: string, index: number) => {
+    //       if (file.response.key === item) {
+    //         deleteIndex3 = index
+    //       }
+    //     })
+    //     this.file_arr.splice(deleteIndex3, 1)
+    //   } else {
+    //     this.product_image.forEach((item: any, index: number) => {
+    //       if (item.url === file.url) {
+    //         deleteIndex2 = index
+    //       }
+    //     })
+    //     this.product_image.splice(deleteIndex2, 1)
+    //   }
+    //   console.log(this.file_arr)
+    //   console.log(this.product_image)
+    //   this.$forceUpdate()
+    //   this.$message({
+    //     type: 'success',
+    //     message: '删除成功!'
+    //   })
+    //   // return false 禁用自带的删除功能
+    //   return false
+    // },
     filterName(name: string[] | string): string {
       if (typeof name === 'string') {
         return name
@@ -536,6 +660,12 @@ export default Vue.extend({
     getInfo(data: ProductForm) {
       this.product_name = data.name
       this.product_type = data.category_id
+      this.product_image = data.images.map((item) => {
+        return {
+          id: item.id,
+          url: item.image_url
+        }
+      })
       this.render_data = JSON.parse(data.category_info)
       this.renderTable(true)
       this.table_data.render_content = data.sku_info.map((item) => {
@@ -545,12 +675,26 @@ export default Vue.extend({
         return obj
       })
       this.table_data.old_render_content = this.$clone(this.table_data.render_content)
+    },
+    querySearch(str: string, cb: (data: any) => void, commonUse: string[]): void {
+      const data = commonUse.map((item) => {
+        return {
+          value: item
+        }
+      })
+      cb(str ? data.filter(this.createFilter(str)) : data)
+    },
+    createFilter(queryString: string) {
+      return (data: any) => {
+        return data.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0
+      }
     }
   },
   mounted() {
-    Promise.all([proType.list(), product.detail({ id: this.$route.params.id })]).then((res) => {
+    Promise.all([proType.list(), product.detail({ id: this.$route.params.id }), getToken()]).then((res) => {
       this.type_list = res[0].data.data
       this.getInfo(res[1].data.data)
+      this.post_data.token = res[2].data.data
     })
   }
 })

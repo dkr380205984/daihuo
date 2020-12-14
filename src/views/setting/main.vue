@@ -1,262 +1,327 @@
 <template>
-  <div id="settingMain">
-    <div class="listCtnNoRepeat">
-      <div class="header">
-        <div class="title">系统设置</div>
-        <div class="btnCtn">
-          <div class="btn btnBlue"
-            @click="addTypeFlag=true;typeInfo.id=''">添加品类</div>
-        </div>
-      </div>
-      <div class="filterCtn">
-        <span class="label">筛选</span>
-        <div class="elCtn">
-          <el-input v-model="msg"
-            placeholder="搜索品类名称"></el-input>
-        </div>
-        <div class="btnCtn">
-          <div class="btn btnGray">重置</div>
-        </div>
-      </div>
-      <div class="content">
-        <div class="tableCtn">
-          <div class="thead">
-            <div class="trowCtn">
-              <div class="trow">
-                <div class="tcolumn">品类名称</div>
-                <div class="tcolumn">操作</div>
-              </div>
-            </div>
-          </div>
-          <div class="tbody">
-            <div class="trowCtn"
-              v-for="(item,index) in list"
-              :key="index">
-              <div class="trow">
-                <div class="tcolumn">
-                  <span class="text">
-                    <span class="showMore">
-                      <i class="el-icon-arrow-right"></i>
-                    </span>
-                    {{item.name}}
-                  </span>
+  <div id="settingMain"
+    class="detailCtnNoRepeat listCtnNoRepeat">
+    <div class="header">
+      <div class="title">系统设置</div>
+    </div>
+    <div class="moduleCtn">
+      <div class="module">
+        <div class="contentCtn"
+          style="padding-left:20px;padding-right:20px">
+          <el-tabs v-model="activeName"
+            @tab-click="handleClick">
+            <el-tab-pane label="用户管理"
+              name="user">
+              <div class="content">
+                <div class="filterCtn">
+                  <span class="label">筛选</span>
+                  <div class="elCtn">
+                    <el-input v-model="msg"
+                      placeholder="搜索用户姓名"></el-input>
+                  </div>
+                  <div class="btnCtn">
+                    <div class="btn btnBlue"
+                      @click="add_user_flag=true">添加用户</div>
+                  </div>
                 </div>
-                <div class="tcolumn flexRow">
-                  <span class="opr">详情</span>
-                  <span class="opr orange"
-                    @click="updateForm(item)">修改</span>
-                  <span class="opr red">删除</span>
-                </div>
-              </div>
-              <div class="detailInfo">
-                <div class="tableInfo">
-                  <div class="th">
-                    <div class="tr">
-                      <div class="tl"><span class="text">一级分类</span></div>
-                      <div class="tl"><span class="text">一级常用项</span></div>
-                      <div class="tl"
-                        style="flex:2">
-                        <div class="tr">
-                          <div class="tl"><span class="text">二级分类</span></div>
-                          <div class="tl"><span class="text">二级常用项</span></div>
-                        </div>
+                <div class="tableCtn">
+                  <div class="thead">
+                    <div class="trowCtn">
+                      <div class="trow">
+                        <div class="tcolumn">用户帐号</div>
+                        <div class="tcolumn">手机号</div>
+                        <div class="tcolumn">姓名</div>
+                        <div class="tcolumn">权限</div>
+                        <div class="tcolumn">状态</div>
+                        <div class="tcolumn">创建日期</div>
+                        <div class="tcolumn">操作</div>
                       </div>
-                      <div class="tl"><span class="text">是否必填项</span></div>
-                      <div class="tl"><span class="text">是否必填项</span></div>
                     </div>
                   </div>
-                  <div class="tb">
-                    <div class="tr"
-                      v-for="(itemChild,indexChild) in item.category_menu"
-                      :key="indexChild">
-                      <div class="tl"><span class="text">{{itemChild.name}}</span></div>
-                      <div class="tl"><span class="text"
-                          :style="{'color':itemChild.commonUse.length>0?'':'#ccc'}">{{itemChild.commonUse.length>0?itemChild.commonUse.join(','):'无常用项'}}</span></div>
-                      <div class="tl"
-                        style="flex:2">
-                        <div class="tr"
-                          v-if="itemChild.category_menu.length===0"><span class="text"
-                            style="color:#ccc">无二级分类</span></div>
-                        <div class="tr"
-                          v-for="(itemSecond,indexSecond) in itemChild.category_menu"
-                          :key="indexSecond">
-                          <div class="tl"><span class="text">{{itemSecond.name}}</span></div>
-                          <div class="tl"><span class="text"
-                              :style="{'color':itemSecond.commonUse.length>0?'':'#ccc'}">{{itemSecond.commonUse.length>0?itemSecond.commonUse.join(','):'无常用项'}}</span></div>
+                  <div class="tbody">
+                    <div class="trowCtn">
+                      <div class="trow">
+                        <div class="tcolumn">用户帐号</div>
+                        <div class="tcolumn">手机号</div>
+                        <div class="tcolumn">姓名</div>
+                        <div class="tcolumn">权限</div>
+                        <div class="tcolumn">状态</div>
+                        <div class="tcolumn">创建日期</div>
+                        <div class="tcolumn flexRow">
+                          <span class="opr orange">修改</span>
+                          <span class="opr red">禁用</span>
                         </div>
                       </div>
-                      <div class="tl"><span class="text"
-                          :style="{'color':itemChild.ifCompose?'#1a95ff':'#ccc'}">{{itemChild.ifCompose?'是':'否'}}</span></div>
-                      <div class="tl"><span class="text"
-                          :style="{'color':itemChild.ifMust?'#1a95ff':'#ccc'}">{{itemChild.ifMust?'是':'否'}}</span></div>
                     </div>
                   </div>
                 </div>
+                <div class="pageCtn">
+                  <el-pagination background
+                    layout="prev, pager, next"
+                    :total="1000">
+                  </el-pagination>
+                </div>
               </div>
-            </div>
-          </div>
+            </el-tab-pane>
+            <el-tab-pane label="仓库管理"
+              name="store">
+              <div class="content">
+                <div class="filterCtn">
+                  <span class="label">筛选</span>
+                  <div class="elCtn">
+                    <el-input v-model="msg"
+                      placeholder="搜索用户姓名"></el-input>
+                  </div>
+                  <div class="btnCtn">
+                    <div class="btn btnBlue"
+                      @click="add_store_flag=true">添加仓库</div>
+                  </div>
+                </div>
+                <div class="tableCtn">
+                  <div class="thead">
+                    <div class="trowCtn">
+                      <div class="trow">
+                        <div class="tcolumn">仓库名称</div>
+                        <div class="tcolumn">库存信息</div>
+                        <div class="tcolumn">创建日期</div>
+                        <div class="tcolumn">操作</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tbody">
+                    <div class="trowCtn">
+                      <div class="trow"
+                        v-for="item in store_list"
+                        :key="item.id">
+                        <div class="tcolumn">{{item.name}}</div>
+                        <div class="tcolumn">库存信息</div>
+                        <div class="tcolumn">{{item.created_at.substring(0,10)}}</div>
+                        <div class="tcolumn flexRow">
+                          <span class="opr blue">详情</span>
+                          <span class="opr orange">修改</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="pageCtn">
+                  <el-pagination background
+                    layout="prev, pager, next"
+                    :total="1000">
+                  </el-pagination>
+                </div>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="供应商管理"
+              name="client">
+              <div class="content">
+                <div class="filterCtn">
+                  <span class="label">筛选</span>
+                  <div class="elCtn">
+                    <el-input v-model="msg"
+                      placeholder="搜索用户姓名"></el-input>
+                  </div>
+                  <div class="btnCtn">
+                    <div class="btn btnBlue"
+                      @click="add_client_flag=true">添加供应商</div>
+                  </div>
+                </div>
+                <div class="tableCtn">
+                  <div class="thead">
+                    <div class="trowCtn">
+                      <div class="trow">
+                        <div class="tcolumn">供应商名称</div>
+                        <div class="tcolumn">联系人</div>
+                        <div class="tcolumn">联系方式</div>
+                        <div class="tcolumn">地址</div>
+                        <div class="tcolumn">简称</div>
+                        <div class="tcolumn">供货类型</div>
+                        <div class="tcolumn">操作</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tbody">
+                    <div class="trowCtn">
+                      <div class="trow"
+                        v-for="item in client_list"
+                        :key="item.id">
+                        <div class="tcolumn">{{item.name}}</div>
+                        <div class="tcolumn">{{item.contact}}</div>
+                        <div class="tcolumn">{{item.phone}}</div>
+                        <div class="tcolumn">{{item.address}}</div>
+                        <div class="tcolumn">{{item.prefix}}</div>
+                        <div class="tcolumn">{{item.type}}</div>
+                        <div class="tcolumn flexRow">
+                          <span class="opr blue">详情</span>
+                          <span class="opr orange">修改</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="pageCtn">
+                  <el-pagination background
+                    layout="prev, pager, next"
+                    :total="1000">
+                  </el-pagination>
+                </div>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
         </div>
       </div>
     </div>
     <div class="sidePopup"
-      v-if="addTypeFlag || updateTypeFlag">
+      v-if="add_user_flag">
       <div class="main">
         <div class="title">
-          <div class="text">{{addTypeFlag?'添加':'修改'}}品类</div>
+          <div class="text">添加用户</div>
           <i class="el-icon-close"
-            @click="addTypeFlag = false ; updateTypeFlag = false ; "></i>
+            @click="add_user_flag = false"></i>
         </div>
         <div class="content">
           <div class="editCtn">
-            <div class="label must">品类名称
+            <div class="label">手机号
               <span class="explanation">(必填)</span>
             </div>
             <div class="inputCtn">
-              <el-input v-model="typeInfo.name"
-                placeholder="输入品类名称"></el-input>
+              <el-input v-model="user_info.telephone"
+                placeholder="请输入手机号"></el-input>
             </div>
-            <div class="btn btnWhiteBlue sepcialBtn"
-              @click="addFirst">添加一级分类</div>
-            <div class="firstModuleCtn">
-              <div class="moduleCtn"
-                v-for="(item,index) in typeInfo.category_menu"
-                :key="index">
-                <i class="deleteIcon el-icon-close"
-                  @click="deleteItem(typeInfo.category_menu,index)"></i>
-                <div class="editCtn">
-                  <div class="label must">分类名称
-                    <span class="explanation">(必填)</span>
-                  </div>
-                  <div class="inputCtn">
-                    <el-input v-model="item.name"
-                      placeholder="输入一级分类的名称"></el-input>
-                  </div>
-                </div>
-                <div class="editCtn"
-                  style="display:flex">
-                  <div style="flex:1">
-                    <div class="inputCtn"
-                      style="line-height:32px">
-                      <el-switch v-model="item.ifCompose"
-                        active-text="组合项"
-                        inactive-text="非组合项"
-                        @change="composeIsMust($event,item)">
-                      </el-switch>
-                      <el-tooltip class="item"
-                        effect="dark"
-                        content="组合项必为必填项"
-                        placement="top">
-                        <i class="el-icon-question"
-                          style="vertical-align: middle;color: #ccc;margin-left: 8px;"></i>
-                      </el-tooltip>
-                    </div>
-                  </div>
-                  <div style="flex:1">
-                    <div class="inputCtn"
-                      style="line-height:32px">
-                      <el-switch v-model="item.ifMust"
-                        active-text="必填项"
-                        inactive-text="非必填项">
-                      </el-switch>
-                    </div>
-                  </div>
-                </div>
-                <div class="editCtn"
-                  v-if="!item.hasChild">
-                  <div class="inputCtn">
-                    <div class="onceTag tag"
-                      v-for="(itemTag,indexTag) in item.commonUseOld"
-                      :key="indexTag + 'old'">
-                      {{itemTag}}
-                      <div class="deleteIcon"
-                        @click="deleteItem(item.commonUseOld,indexTag,'firstType')">
-                        <i class="el-icon-close"></i>
-                      </div>
-                    </div>
-                    <div class="onceTag"
-                      v-for="(itemNew,indexNew) in item.commonUseNew"
-                      :key="indexNew + 'new'">
-                      <el-input style="height:32px;width:100px"
-                        v-model="item.commonUseNew[indexNew]"
-                        placeholder="建议项">
-                      </el-input>
-                      <div class="deleteIcon"
-                        @click="deleteItem(item.commonUseNew,indexNew)">
-                        <i class="el-icon-close"></i>
-                      </div>
-                    </div>
-                    <div class="plusBtn"
-                      @click="item.commonUseNew.push('')"><i class="el-icon-plus"></i></div>
-                  </div>
-                </div>
-                <div class="editCtn">
-                  <div class="inputCtn"
-                    style="line-height:32px">
-                    <el-switch v-model="item.hasChild"
-                      active-text="含二级分类"
-                      inactive-text="不含二级分类">
-                    </el-switch>
-                    <div class="btn btnWhiteBlue sepcialBtn2"
-                      v-if="item.hasChild"
-                      @click="addSecond(item.category_menu)">添加二级分类</div>
-                    <div class="secondModuleCtn"
-                      v-if="item.hasChild">
-                      <div class="moduleCtn"
-                        v-for="(itemChild,indexChild) in item.category_menu"
-                        :key="indexChild">
-                        <i class="deleteIcon el-icon-close"
-                          @click="deleteItem(item.category_menu,indexChild)"></i>
-                        <div class="editCtn">
-                          <div class="label must">分类名称
-                            <span class="explanation">(必填)</span>
-                          </div>
-                          <div class="inputCtn">
-                            <el-input v-model="itemChild.name"
-                              placeholder="输入二级分类的名称"></el-input>
-                          </div>
-                        </div>
-                        <div class="editCtn">
-                          <div class="inputCtn">
-                            <div class="onceTag tag"
-                              v-for="(itemTag,indexTag) in itemChild.commonUseOld"
-                              :key="indexTag + 'old'">
-                              {{itemTag}}
-                              <div class="deleteIcon"
-                                @click="deleteItem(item.commonUseOld,indexTag,'firstType')">
-                                <i class="el-icon-close"></i>
-                              </div>
-                            </div>
-                            <div class="onceTag"
-                              v-for="(itemNew,indexNew) in itemChild.commonUseNew"
-                              :key="indexNew + 'new'">
-                              <el-input style="height:32px;width:100px"
-                                v-model="itemChild.commonUseNew[indexNew]"
-                                placeholder="建议项">
-                              </el-input>
-                              <div class="deleteIcon"
-                                @click="deleteItem(itemChild.commonUseNew,indexNew)">
-                                <i class="el-icon-close"></i>
-                              </div>
-                            </div>
-                            <div class="plusBtn"
-                              @click="itemChild.commonUseNew.push('')"><i class="el-icon-plus"></i></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">登录账号
+              <span class="explanation">(不填默认为手机号)</span>
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="user_info.telephone"
+                placeholder="请输入登录帐号"></el-input>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">用户姓名
+              <span class="explanation">(必填)</span>
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="user_info.name"
+                placeholder="请输入姓名"></el-input>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">用户身份
+              <span class="explanation">(必填)</span>
+            </div>
+            <div class="inputCtn">
+              <el-select v-model="user_info.type"
+                placeholder="请选择用户身份">
+                <el-option v-for="item in power_arr"
+                  :key="item.value"
+                  :value="item.value"
+                  :label="item.label"></el-option>
+              </el-select>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">用户状态
+              <span class="explanation">(必选)</span>
+            </div>
+            <div class="inputCtn"
+              style="line-height:32px">
+              <el-switch v-model="user_info.state"
+                active-color="#01B48C"
+                inactive-color="#F5222D"
+                active-text="启用"
+                inactive-text="禁用">
+              </el-switch>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">备注信息
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="user_info.msg"
+                placeholder="请输入备注信息"></el-input>
             </div>
           </div>
         </div>
         <div class="oprCtn">
           <div class="btnCtn">
             <div class="btn btnGray"
-              @click="addTypeFlag = false ; updateTypeFlag = false">取消</div>
-            <div class="btn"
-              @click="saveType"
-              :class="{'btnBlue':addTypeFlag,'btnOrange':updateTypeFlag}">{{addTypeFlag?'添加':'修改'}}</div>
+              @click="add_user_flag = false">取消</div>
+            <div class="btn btnBlue"
+              @click="saveUser">添加</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sidePopup"
+      v-if="add_client_flag">
+      <div class="main">
+        <div class="title">
+          <div class="text">添加供应商</div>
+          <i class="el-icon-close"
+            @click="add_client_flag = false"></i>
+        </div>
+        <div class="content">
+          <div class="editCtn">
+            <div class="label">供应商名称
+              <span class="explanation">(必填)</span>
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="client_info.name"
+                placeholder="请输入供应商名称"></el-input>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">联系人
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="client_info.contact"
+                placeholder="请输入联系人姓名"></el-input>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">联系方式
+              <span class="explanation">(必填)</span>
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="client_info.phone"
+                placeholder="请输入供应商/联系人手机号"></el-input>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">单位地址
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="client_info.address"
+                placeholder="请输入单位地址"></el-input>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">供应商简称
+              <span class="explanation">(必填)</span>
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="client_info.prefix"
+                placeholder="请输入供应商首字母简称，如桐庐凯瑞，输入TLKR或KR"></el-input>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label">服务类型
+              <span class="explanation">(必填)</span>
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="client_info.type"
+                placeholder="例如围巾，手套，帽子等，可以统称为小商品或服装"></el-input>
+            </div>
+          </div>
+        </div>
+        <div class="oprCtn">
+          <div class="btnCtn">
+            <div class="btn btnGray"
+              @click="add_client_flag = false">取消</div>
+            <div class="btn btnBlue"
+              @click="saveClient">添加</div>
           </div>
         </div>
       </div>
@@ -265,243 +330,116 @@
 </template>
 
 <script lang="ts">
-import { proType } from '@/assets/js/api'
 import Vue from 'vue'
-interface TypeForm {
-  id?: number | null | string
-  name: string
-  is_required?: boolean
-  is_combine?: boolean
-  commonUse?: any[]
-  category_menu?: TypeForm[] | string | undefined
-}
+import { StoreInfo } from '@/types/store'
+import { ClientInfo } from '@/types/client'
+import { UserInfo } from '@/types/setting'
+import { store, client } from '@/assets/js/api'
 export default Vue.extend({
-  data() {
+  data(): {
+    user_info: UserInfo
+    store_info: StoreInfo
+    user_list: UserInfo[]
+    store_list: StoreInfo[]
+    client_info: ClientInfo
+    client_list: ClientInfo[]
+    [propName: string]: any
+  } {
     return {
       msg: '',
-      list: [],
-      addTypeFlag: false,
-      updateTypeFlag: false,
-      typeInfo: {
-        id: '',
+      activeName: 'user',
+      add_user_flag: false,
+      user_info: {
+        username: '',
+        telephone: '',
         name: '',
-        category_menu: [
-          {
-            name: '',
-            ifMust: false, // 是否必填
-            ifCompose: false, // 是否组合
-            hasChild: false, // 有无二级分类
-            category_menu: [
-              {
-                name: '',
-                commonUseOld: [] as string[],
-                commonUseNew: ['']
-              }
-            ],
-            commonUseOld: [] as string[],
-            commonUseNew: ['']
-          }
-        ]
-      }
+        desc: '',
+        state: true, // 状态
+        type: '' // 权限
+      },
+      user_list: [],
+      power_arr: [
+        {
+          value: 1,
+          label: '主播'
+        },
+        {
+          value: 2,
+          label: '超管'
+        },
+        {
+          value: 3,
+          label: '工作人员'
+        }
+      ],
+      add_store_flag: false,
+      store_info: {
+        name: ''
+      },
+      store_list: [],
+      add_client_flag: false,
+      client_info: {
+        name: '',
+        contact: '',
+        phone: '',
+        address: '',
+        prefix: '',
+        type: ''
+      },
+      client_list: []
     }
   },
   methods: {
-    addFirst(): void {
-      this.typeInfo.category_menu.push({
-        name: '',
-        ifMust: false, // 是否必填
-        ifCompose: false, // 是否组合
-        hasChild: false, // 有无二级分类
-        category_menu: [
-          {
-            name: '',
-            commonUseOld: [],
-            commonUseNew: ['']
-          }
-        ],
-        commonUseOld: [],
-        commonUseNew: ['']
-      })
+    handleClick() {
+      if (this.activeName === 'store') {
+        this.getStoreList()
+      } else if (this.activeName === 'client') {
+        this.getClientList()
+      }
     },
-    addSecond(father: any[]): void {
-      father.push({
-        name: '',
-        commonUseOld: [],
-        commonUseNew: ['']
-      })
-    },
-    deleteItem(array: any[], index: number, type?: string): void {
-      if (type === 'firstType') {
-        this.$confirm('是否删除该建议项?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
+    getStoreList(): void {
+      store
+        .list({
+          page: 1,
+          limit: 10
         })
-          .then(() => {
-            array.splice(index, 1)
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
-          })
-          .catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
-          })
-        return
-      }
-      // 建议项可以删干净，其他的不行
-      if (array.length === 1) {
-        this.$message.error('至少有一项')
-        return
-      }
-      array.splice(index, 1)
-    },
-    // 需要组合的分类必须是必填项
-    composeIsMust(ev: boolean, item: any): void {
-      if (ev) {
-        item.ifMust = true
-      }
-    },
-    // 适配器
-    formAdapter(): TypeForm {
-      const formData: TypeForm = {
-        id: this.updateTypeFlag ? this.typeInfo.id : null,
-        name: this.typeInfo.name,
-        category_menu: JSON.stringify(
-          this.typeInfo.category_menu.map((item) => {
-            return {
-              name: item.name,
-              is_required: item.ifMust,
-              is_combine: item.ifCompose,
-              commonUse: item.commonUseOld.filter((itemA) => itemA).concat(item.commonUseNew.filter((itemB) => itemB)),
-              category_menu: item.hasChild
-                ? item.category_menu.map((itemChild) => {
-                    return {
-                      commonUse: itemChild.commonUseOld
-                        .filter((itemA) => itemA)
-                        .concat(itemChild.commonUseNew.filter((itemB) => itemB)),
-                      name: itemChild.name
-                    }
-                  })
-                : []
-            }
-          })
-        )
-      }
-      return formData
-    },
-    // 检查表单
-    formCheck(): boolean {
-      let errMsg = ''
-      if (!this.typeInfo.name) {
-        errMsg = '请输入品类名称'
-      }
-      this.typeInfo.category_menu.forEach((item) => {
-        if (!item.name) {
-          errMsg = '请输入一级分类名称'
-        }
-        if (item.hasChild) {
-          item.category_menu.forEach((itemChild) => {
-            if (!itemChild.name) {
-              errMsg = '请输入二级分类名称'
-            }
-          })
-        }
-      })
-      if (errMsg) {
-        this.$message.error(errMsg)
-        return false
-      } else {
-        return true
-      }
-    },
-    resetForm(): void {
-      this.typeInfo = {
-        id: '',
-        name: '',
-        category_menu: [
-          {
-            name: '',
-            ifMust: false, // 是否必填
-            ifCompose: false, // 是否组合
-            hasChild: false, // 有无二级分类
-            category_menu: [
-              {
-                name: '',
-                commonUseOld: [] as string[],
-                commonUseNew: ['']
-              }
-            ],
-            commonUseOld: [] as string[],
-            commonUseNew: ['']
-          }
-        ]
-      }
-    },
-    // 保存/修改品类
-    saveType(): void {
-      if (this.formCheck()) {
-        const formData = this.formAdapter()
-        console.log(formData)
-        proType.save(formData as any).then((res) => {
+        .then((res) => {
           if (res.data.status) {
-            this.$message.success(this.addTypeFlag ? '添加成功' : '修改成功')
-            this.addTypeFlag = false
-            this.updateTypeFlag = false
-            this.resetForm()
+            this.store_list = res.data.data
           }
         })
-      }
     },
-    // 修改品类
-    updateForm(object: TypeForm) {
-      const cloneData = this.$clone(object)
-      this.typeInfo = cloneData
-      this.updateTypeFlag = true
-    }
-  },
-  mounted() {
-    proType
-      .list({
-        page: 1,
-        limit: 5
-      })
-      .then((res) => {
+    getClientList(): void {
+      client
+        .list({
+          page: 1,
+          limit: 10
+        })
+        .then((res) => {
+          if (res.data.status) {
+            this.client_list = res.data.data.items
+          }
+        })
+    },
+    saveUser(): void {
+      console.log(this.user_info)
+    },
+    saveStore(): void {
+      store.storeSave(this.store_info).then((res) => {
         if (res.data.status) {
-          this.list = res.data.data.map((item: { name: string; id: number; category_menu: any }) => {
-            return {
-              showMore: false,
-              name: item.name,
-              id: item.id,
-              category_menu: JSON.parse(item.category_menu).map(
-                (itemChild: { name: any; is_required: any; is_combine: any; category_menu: any[]; commonUse: any }) => {
-                  return {
-                    name: itemChild.name,
-                    ifMust: itemChild.is_required, // 是否必填
-                    ifCompose: itemChild.is_combine, // 是否组合
-                    hasChild: itemChild.category_menu.length > 0, // 有无二级分类
-                    category_menu: itemChild.category_menu.map((itemSecond: { name: any; commonUse: any }) => {
-                      return {
-                        name: itemSecond.name,
-                        commonUse: itemSecond.commonUse,
-                        commonUseOld: itemSecond.commonUse,
-                        commonUseNew: ['']
-                      }
-                    }),
-                    commonUse: itemChild.commonUse,
-                    commonUseOld: itemChild.commonUse,
-                    commonUseNew: ['']
-                  }
-                }
-              )
-            }
-          })
-          console.log(this.list)
+          this.$message.success('添加成功')
+          this.add_store_flag = false
         }
       })
+    },
+    saveClient(): void {
+      client.save(this.client_info).then((res) => {
+        if (res.data.status) {
+          this.$message.success('添加成功')
+          this.add_client_flag = false
+        }
+      })
+    }
   }
 })
 </script>

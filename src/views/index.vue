@@ -44,22 +44,17 @@ interface NavInfo {
 export default Vue.extend({
   data(): { navList: NavInfo[]; [propName: string]: any } {
     return {
-      navList: []
+      navList: [
+        { name: '首页', url: '/index', active: true },
+        { name: '产品管理', url: '/product/list' },
+        { name: '库存管理', url: '/stock/list' },
+        { name: '订单管理', url: '/order/list' },
+        { name: '主播管理', url: '/index' },
+        { name: '个人中心', url: '/index' },
+        { name: '品类设置', url: '/setting/category' },
+        { name: '系统设置', url: '/setting/main' }
+      ]
     }
-  },
-  created() {
-    this.navList = [
-      { name: '首页', url: '/index', active: true },
-      { name: '列表通用样式', url: '/css/list' },
-      { name: '详情通用样式', url: '/css/detail' },
-      { name: '添加通用样式', url: '/css/create' },
-      { name: '产品管理', url: '/product/list' },
-      { name: '库存管理', url: '/product/list' },
-      { name: '订单管理', url: '/index' },
-      { name: '主播管理', url: '/index' },
-      { name: '个人中心', url: '/index' },
-      { name: '系统设置', url: '/setting/main' }
-    ]
   }
 })
 </script>

@@ -1,56 +1,53 @@
 import http from './http'
+import { ListParam, DeatailParam } from '@/types/axiosParam'
 const baseUrl = '/api'
 
-// 列表公共信息
-interface ListParam {
-  page: number
-  limit: number
-  [propName: string]: any
-}
-interface DeatailParam {
-  id: number | string,
-  [propName: string]: any
-}
+
 // 登录
 const login = (params: any) => http.post(`${baseUrl}/auth/login`, params, 'application/json')
-
+const getToken = () => http.get(`${baseUrl}/upload/token`)
 // 品类设置
-interface CategroySave {
-  id: number | null,
-  name: string,
-  category_menu: string | undefined
-}
+import { CategroySave } from '@/types/categroy'
 const proType = {
   save: (params: CategroySave) => http.post(`${baseUrl}/category/save`, params, 'application/json'),
   list: (params?: ListParam) => http.get(`${baseUrl}/category/lists`, params)
 }
 
 // 产品
-interface SkuInfo {
-  sku_id: string | number
-  price: number | string
-  store: string | string
-  sku_info: string
-  image_url: string
-}
-interface ProductSave {
-  name: string
-  category_id: number | string
-  category_info: string
-  sku_info: SkuInfo[]
-  client_id: number | string
-  brand_id: number | string
-  images: string[]
-  description: string
-}
+import { ProductSave } from '@/types/product'
 const product = {
   save: (params: ProductSave) => http.post(`${baseUrl}/product/save`, params, 'application/json'),
   list: (params: ListParam) => http.get(`${baseUrl}/product/lists`, params),
   detail: (params: DeatailParam) => http.get(`${baseUrl}/product/detail`, params),
   delete: (params: DeatailParam) => http.post(`${baseUrl}/product/delete`, params, 'application/json')
 }
+
+// 订单
+const order = {
+  import: (params: any) => http.post(`${baseUrl}/order/import`, params, 'form-data'),
+  list: (params: ListParam) => http.get(`${baseUrl}/order/lists`, params)
+}
+
+// 库存
+import { SkuStoreSave, StoreInfo } from '@/types/store'
+const store = {
+  list: (params: ListParam) => http.get(`${baseUrl}/edit/store/lists`, params),
+  storeSave: (params: StoreInfo) => http.post(`${baseUrl}/edit/store/save`, params, 'application/json'),
+  skuSave: (params: SkuStoreSave) => http.post(`${baseUrl}/sku/store/save`, params, 'application/json')
+}
+
+// 单位
+import { ClientInfo } from '@/types/client'
+const client = {
+  save: (params: ClientInfo) => http.post(`${baseUrl}/edit/client/save`, params, 'application/json'),
+  list: (params: ListParam) => http.get(`${baseUrl}/edit/client/lists`, params)
+}
 export {
+  client,
+  store,
+  order,
   product,
   proType,
-  login
+  login,
+  getToken
 }
