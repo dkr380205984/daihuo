@@ -1,6 +1,7 @@
 <template>
   <div id="productDetail"
-    class="detailCtnNoRepeat">
+    class="detailCtnNoRepeat"
+    v-loading="loading">
     <div class="header">
       <div class="title">产品详情</div>
     </div>
@@ -44,12 +45,13 @@
             <div class="colCtn">
               <span class="label">产品图片：</span>
               <div class="imgCtn">
-                <el-image style="width:150px;height:150px;margin-right:16px"
+                <div class="img"
                   v-for="(item,index) in product_image"
-                  :key="index"
-                  :src="item.image_url || ''"
-                  :preview-src-list="[item.image_url]">
-                </el-image>
+                  :key="index">
+                  <el-image :src="item.image_url || require('@/assets/image/noPic.jpg')"
+                    :preview-src-list="item.image_url?[item.image_url]:[require('@/assets/image/noPic.jpg')]">
+                  </el-image>
+                </div>
               </div>
             </div>
           </div>
@@ -77,7 +79,8 @@
                         <span v-if="itemChild==='图片'&&!item[itemChild]">暂无图片</span>
                         <el-image v-if="itemChild==='图片' && item[itemChild]"
                           style="width:80px;height:80px;;padding:10px 0"
-                          :src="item[itemChild]">
+                          :src="item[itemChild]"
+                          :preview-src-list="item[itemChild]?[item[itemChild]]:[require('@/assets/image/noPic.jpg')]">
                         </el-image>
                       </div>
                     </div>
@@ -91,44 +94,25 @@
       <div class="cardCtn">
         <div class="card">
           <div class="title">
-            <span class="left">累计收藏</span>
+            <span class="left">收藏主播</span>
             <span class="right">查看全部</span>
           </div>
           <div class="content">
             <div class="label">累计收藏
-              <i class="el-icon-question"></i>
+              <!-- <i class="el-icon-question"></i> -->
             </div>
-            <div class="number">7.54<em>次</em></div>
-            <div class="rate">较昨日<em class="green">新增9%</em></div>
+            <div class="number">{{collect_data.total}}<em>次</em></div>
+            <!-- <div class="rate">较昨日<em class="green">新增9%</em></div> -->
             <div class="otherInfo">
               <div class="text">最近新增</div>
-              <div class="line">
+              <div class="line"
+                v-for="(item,index) in collect_data.newList"
+                :key="index">
                 <span class="left">
                   <div class="circle"></div>
-                  张三
+                  {{item.user_name}}
                 </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
+                <span class="right">{{$diffDate(item.create_time)}}</span>
               </div>
             </div>
           </div>
@@ -139,84 +123,37 @@
             <span class="right">查看全部</span>
           </div>
           <div class="content">
-            <div class="label">小标题:问号</div>
-            <div class="number">7.54<em>次</em></div>
-            <div class="rate">较昨日<em class="green">新增9%</em></div>
+            <div class="label">累计订单
+              <i class="el-icon-question"></i>
+            </div>
+            <div class="number">{{order_data.total}}<em>个</em></div>
+            <!-- <div class="rate">较昨日<em class="green">新增9%</em></div> -->
             <div class="otherInfo">
               <div class="text">最近新增</div>
-              <div class="line">
+              <div class="line"
+                v-for="(item,index) in order_data.newList"
+                :key="index">
                 <span class="left">
-                  <div class="circle"></div>
-                  张三
+                  <div class="circle"
+                    style="background:#01B48C"></div>
+                  {{item.order_code}}
                 </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
+                <span class="right">{{$diffDate(item.create_time)}}</span>
               </div>
             </div>
           </div>
         </div>
         <div class="card">
           <div class="title">
-            <span class="left">库存数量</span>
+            <span class="left">产品库存</span>
             <span class="right">查看全部</span>
           </div>
           <div class="content">
-            <div class="label">累计收藏
-              <i class="el-icon-question"></i>
-            </div>
-            <div class="number">7.54<em>次</em></div>
-            <div class="rate">较昨日<em class="green">新增9%</em></div>
-            <div class="otherInfo">
-              <div class="text">最近新增</div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-              <div class="line">
-                <span class="left">
-                  <div class="circle"></div>
-                  张三
-                </span>
-                <span class="right">2020-12-12 09:12</span>
-              </div>
-            </div>
+            <div class="label">库存数量</div>
+            <div class="number">{{store_data.total}}<em>个</em></div>
+            <!-- <div class="rate">较昨日<em class="green">新增9%</em></div> -->
+            <div ref="chart"
+              style="width: 336px;height:180px;"></div>
           </div>
         </div>
       </div>
@@ -226,7 +163,8 @@
         <div class="btnCtn">
           <div class="btn btnGray"
             @click="$router.go(-1)">返回</div>
-          <div class="btn btnBlue">提交</div>
+          <div class="btn btnOrange"
+            @click="$router.push('/product/update/' + $route.params.id)">修改</div>
         </div>
       </div>
     </div>
@@ -236,28 +174,15 @@
 <script lang="ts">
 import Vue from 'vue'
 import { product } from '@/assets/js/api'
-interface SkuInfo {
-  sku_id: string | number
-  price: number
-  store: string
-  sku_info: string
-  image_url: string
-  sku_code?: string
+import { ProductForm } from '@/types/product'
+import { SkuInfo } from '@/types/product'
+interface ListData {
+  list: any[]
+  total: number
 }
-interface ProductForm {
-  name: string
-  category_id: number | string
-  category_info: string
-  sku_info: SkuInfo[]
-  client_id: number | string
-  brand_id: number | string
-  images: string[]
-  description: string
-  min_price: number
-  max_price: number
-  product_code: string
-  id?: string | number
-  create_time: string
+interface ProductDetail extends ProductForm {
+  order_data: ListData
+  collect_data: ListData
 }
 export default Vue.extend({
   data(): {
@@ -265,6 +190,7 @@ export default Vue.extend({
     [propName: string]: any
   } {
     return {
+      loading: true,
       product_code: '',
       product_name: '',
       product_type: '',
@@ -277,16 +203,31 @@ export default Vue.extend({
       table_data: {
         header: [], // 存放表头
         render_content: []
+      },
+      collect_data: {
+        total: 0,
+        list: [],
+        newList: []
+      },
+      order_data: {
+        total: 0,
+        list: [],
+        newList: []
+      },
+      store_data: {
+        total: 0
       }
     }
   },
   methods: {
-    formAdapter(data: ProductForm): void {
+    formAdapter(data: ProductDetail): void {
       this.product_code = data.product_code
       this.product_name = data.name
       this.desc = data.description
       this.create_time = data.create_time.substring(0, 10)
-      this.product_image = data.images
+      this.product_image = data.images.length === 0 ? [''] : data.images
+      this.from_client = data.client_name
+      this.product_brand = data.brand_id
       this.table_data.render_content = data.sku_info.map((item) => {
         const obj = JSON.parse(item.sku_info)
         const sku = 'sku编码'
@@ -301,7 +242,62 @@ export default Vue.extend({
           this.table_data.header.push(key)
         }
       }
-      console.log(this.table_data.render_content)
+
+      this.collect_data = data.collect_data
+      this.collect_data.newList = data.collect_data.list.slice(0, 4)
+      this.order_data = data.order_data
+      this.order_data.newList = data.order_data.list.slice(0, 4)
+      this.store_data.total = data.sku_info.reduce((total: number, current: SkuInfo) => {
+        return total + current.store
+      }, 0)
+      this.getEcharts(data.sku_info)
+    },
+    getEcharts(skuInfo: SkuInfo[]) {
+      const $echarts = require('echarts')
+      const Chart = $echarts.init(this.$refs.chart as HTMLCanvasElement)
+      console.log()
+      const option = {
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          right: 10,
+          top: 10,
+          data: skuInfo.map((item) => item.sku_code)
+        },
+        series: [
+          {
+            name: '库存数量',
+            type: 'pie',
+            radius: ['50%', '70%'],
+            avoidLabelOverlap: false,
+            label: {
+              show: false,
+              position: 'center'
+            },
+            right: 160,
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: '14',
+                fontWeight: 'bold'
+              }
+            },
+            labelLine: {
+              show: false
+            },
+            data: skuInfo.map((item) => {
+              return {
+                name: item.sku_code,
+                value: item.store
+              }
+            })
+          }
+        ]
+      }
+      Chart.setOption(option)
     }
   },
   mounted() {
@@ -309,6 +305,7 @@ export default Vue.extend({
       console.log(res.data.data)
       if (res.data.status) {
         this.formAdapter(res.data.data)
+        this.loading = false
       }
     })
   }
@@ -317,4 +314,12 @@ export default Vue.extend({
 
 <style lang="less" scoped>
 @import '~@/assets/less/product/detail.less';
+</style>
+<style lang="less">
+.img {
+  img {
+    height: 150px;
+    width: auto;
+  }
+}
 </style>

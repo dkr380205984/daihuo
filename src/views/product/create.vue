@@ -108,7 +108,7 @@
           <div class="title">详细信息
             <el-tooltip class="item"
               effect="dark"
-              content="注意：修改非表格信息会重置表格的单价信息，请务必在填写完其他信息后再填写单价信息"
+              content="注意：修改非表格信息会重置表格的价格信息，请务必在填写完其他信息后再填写价格信息"
               placement="top">
               <i style="color:#ccc"
                 class="el-icon-question"></i>
@@ -224,6 +224,8 @@
                             v-model="itemRow[filterName(item.name)]"
                             @input="$forceUpdate()"
                             :placeholder="item.name">
+                            <template v-if="item.name==='零售价'||item.name==='成本价'"
+                              slot="append">元</template>
                           </el-input>
                           <el-upload v-if="!item.firstName && item.name==='图片'"
                             class="avatar-uploader"
@@ -265,7 +267,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { proType, product, getToken } from '@/assets/js/api'
+import { proType, product, getToken, client } from '@/assets/js/api'
 import { SkuInfo, ProductForm } from '@/types/product'
 
 export default Vue.extend({
@@ -283,7 +285,7 @@ export default Vue.extend({
       product_image: [],
       brand_list: [],
       product_detail: [],
-      from_client: 1,
+      from_client: '',
       client_list: [],
       desc: '',
       render_data: [],
@@ -299,6 +301,12 @@ export default Vue.extend({
     // 选取品类初始化数据
     renderDom(id: number): void {
       const finded: any = this.type_list.find((itemFind: { id: number; category_menu: string }) => itemFind.id === id)
+      this.table_data = {
+        header: [], // 存放表头
+        normal_content: [], // 存放非组合项
+        mix_content: [], // 存放组合项
+        render_content: [] // 需要渲染的表格,实时计算
+      }
       this.render_data = JSON.parse(finded.category_menu)
       this.render_data.forEach((item: any) => {
         if (item.is_combine) {
@@ -360,7 +368,12 @@ export default Vue.extend({
           {
             is_combine: false,
             is_required: true,
-            name: '单价'
+            name: '零售价'
+          },
+          {
+            is_combine: false,
+            is_required: true,
+            name: '成本价'
           },
           {
             is_combine: false,
@@ -500,10 +513,14 @@ export default Vue.extend({
           }
         })
         // 修复tslint不允许字符串访问对象的脑瘫设定
-        const price = '单价'
+        const price = '成本价'
+        const costPrice = '零售价'
         this.table_data.render_content.forEach((item: any) => {
           if (!item[price] && Number(item[price] !== 0)) {
-            msg = '单价未填写，单价可填0'
+            msg = '成本价未填写，成本价可填0'
+          }
+          if (!item[costPrice] && Number(item[costPrice] !== 0)) {
+            msg = '零售价未填写，零售价可填0'
           }
         })
       }
@@ -519,7 +536,8 @@ export default Vue.extend({
         return
       }
       // 修复tslint不允许字符串访问对象的脑瘫设定
-      const price = '单价'
+      const price = '零售价'
+      const costPrice = '成本价'
       const image = '图片'
       const formData: ProductForm = {
         name: this.product_name,
@@ -530,6 +548,7 @@ export default Vue.extend({
             return {
               sku_id: index >= 9 ? index + 1 : '0' + (index + 1),
               price: item[price],
+              cost_price: item[costPrice],
               sku_info: JSON.stringify(item),
               image_url: item[image]
             }
@@ -549,6 +568,7 @@ export default Vue.extend({
       product.save(formData).then((res: any) => {
         if (res.data.status) {
           this.$message.success('添加成功')
+          this.$router.push('/product/detail/' + res.data.data)
         }
       })
     },
@@ -623,9 +643,10 @@ export default Vue.extend({
     }
   },
   mounted() {
-    Promise.all([proType.list(), getToken()]).then((res) => {
+    Promise.all([proType.list(), getToken(), client.list()]).then((res) => {
       this.type_list = res[0].data.data
       this.post_data.token = res[1].data.data
+      this.client_list = res[2].data.data
     })
   }
 })

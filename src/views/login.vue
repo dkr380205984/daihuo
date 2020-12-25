@@ -90,7 +90,7 @@ export default Vue.extend({
             window.localStorage.setItem('dhPassword', '')
           }
           this.$message.success('登录成功')
-          this.$router.push('/setting/main')
+          this.$router.push('/setting/main/page=1&&keyword')
         } else {
           this.$message.error({
             message: res.data.message

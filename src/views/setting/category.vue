@@ -24,6 +24,7 @@
             <div class="trowCtn">
               <div class="trow">
                 <div class="tcolumn">品类名称</div>
+                <div class="tcolumn">品类单位</div>
                 <div class="tcolumn">操作</div>
               </div>
             </div>
@@ -35,20 +36,23 @@
               <div class="trow">
                 <div class="tcolumn">
                   <span class="text">
-                    <span class="showMore">
-                      <i class="el-icon-arrow-right"></i>
+                    <span class="showMore"
+                      @click="item.unshow=!item.unshow;$forceUpdate()">
+                      <i :class="{'el-icon-arrow-down':!item.unshow,'el-icon-arrow-right':item.unshow}"></i>
                     </span>
                     {{item.name}}
                   </span>
                 </div>
+                <div class="tcolumn">品类单位</div>
                 <div class="tcolumn flexRow">
-                  <span class="opr">详情</span>
                   <span class="opr orange"
                     @click="updateForm(item)">修改</span>
-                  <span class="opr red">删除</span>
+                  <span class="opr red"
+                    @click="deleteForm(item.id)">删除</span>
                 </div>
               </div>
-              <div class="detailInfo">
+              <div class="detailInfo"
+                v-show="!item.unshow">
                 <div class="tableInfo">
                   <div class="th">
                     <div class="tr">
@@ -69,7 +73,8 @@
                     <div class="tr"
                       v-for="(itemChild,indexChild) in item.category_menu"
                       :key="indexChild">
-                      <div class="tl"><span class="text">{{itemChild.name}}</span></div>
+                      <div class="tl"><span class="text">{{itemChild.name}}</span>
+                      </div>
                       <div class="tl"><span class="text"
                           :style="{'color':itemChild.commonUse.length>0?'':'#ccc'}">{{itemChild.commonUse.length>0?itemChild.commonUse.join(','):'无常用项'}}</span></div>
                       <div class="tl"
@@ -114,6 +119,15 @@
             <div class="inputCtn">
               <el-input v-model="typeInfo.name"
                 placeholder="输入品类名称"></el-input>
+            </div>
+          </div>
+          <div class="editCtn">
+            <div class="label must">品类单位
+              <span class="explanation">(必填)</span>
+            </div>
+            <div class="inputCtn">
+              <el-input v-model="typeInfo.unit"
+                placeholder="输入品类单位"></el-input>
             </div>
             <div class="btn btnWhiteBlue sepcialBtn"
               @click="addFirst">添加一级分类</div>
@@ -266,15 +280,8 @@
 
 <script lang="ts">
 import { proType } from '@/assets/js/api'
+import { TypeForm } from '@/types/setting'
 import Vue from 'vue'
-interface TypeForm {
-  id?: number | null | string
-  name: string
-  is_required?: boolean
-  is_combine?: boolean
-  commonUse?: any[]
-  category_menu?: TypeForm[] | string | undefined
-}
 export default Vue.extend({
   data() {
     return {
@@ -285,6 +292,7 @@ export default Vue.extend({
       typeInfo: {
         id: '',
         name: '',
+        unit: '',
         category_menu: [
           {
             name: '',
@@ -370,6 +378,7 @@ export default Vue.extend({
       const formData: TypeForm = {
         id: this.updateTypeFlag ? this.typeInfo.id : null,
         name: this.typeInfo.name,
+        unit: this.typeInfo.unit,
         category_menu: JSON.stringify(
           this.typeInfo.category_menu.map((item) => {
             return {
@@ -422,6 +431,7 @@ export default Vue.extend({
       this.typeInfo = {
         id: '',
         name: '',
+        unit: '',
         category_menu: [
           {
             name: '',
@@ -461,6 +471,30 @@ export default Vue.extend({
       const cloneData = this.$clone(object)
       this.typeInfo = cloneData
       this.updateTypeFlag = true
+    },
+    deleteForm(id: number) {
+      this.$confirm('是否删除该品类?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          proType
+            .delete({
+              id
+            })
+            .then((res) => {
+              if (res.data.status) {
+                this.$message.success('删除成功')
+              }
+            })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     }
   },
   mounted() {

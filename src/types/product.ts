@@ -1,6 +1,7 @@
 export interface SkuInfo {
   sku_id: string | number
   price: number
+  cost_price: number
   sku_info: string
   image_url: string
   [propName: string]: any
@@ -13,7 +14,7 @@ export interface ProductForm {
   sku_info: SkuInfo[]
   client_id: number | string
   brand_id: number | string
-  images: string[]
+  images: any[]
   description: string
   min_price: number
   max_price: number

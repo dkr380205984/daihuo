@@ -1,9 +1,27 @@
 export interface UserInfo {
   id?: string | number // 修改时候用
-  telephone: string
+  phone: string
   name: string
-  username: string
+  user_name: string
   type: string // 管理权限
-  state?: boolean // 状态
+  status?: boolean // 状态
   desc?: string
+}
+
+export interface TypeForm {
+  id?: number | null | string
+  name: string
+  unit?: string
+  is_required?: boolean
+  is_combine?: boolean
+  commonUse?: any[]
+  category_menu?: TypeForm[] | string | undefined
+}
+
+export interface ServiceInfo {
+  id?: string | number
+  phone: string
+  name: string
+  contact: string,
+  desc: string
 }

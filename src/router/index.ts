@@ -27,7 +27,7 @@ const routes: RouteConfig[] = [{
     name: 'cssCreate',
     component: () => import('../views/css/create.vue')
   }, {
-    path: '/product/list',
+    path: '/product/list/:params',
     name: 'productList',
     component: () => import('../views/product/list.vue')
   }, {
@@ -43,22 +43,34 @@ const routes: RouteConfig[] = [{
     name: 'productDetail',
     component: () => import('../views/product/detail.vue')
   }, {
-    path: '/order/list',
+    path: '/order/list/:params',
     name: 'orderList',
     component: () => import('../views/order/list.vue')
   }, {
-    path: '/stock/list',
-    name: 'stockList',
-    component: () => import('../views/stock/list.vue')
+    path: '/store/logList/:params',
+    name: 'storeLogList',
+    component: () => import('../views/store/logList.vue')
   }, {
-    path: '/setting/category',
+    path: '/store/list/:params',
+    name: 'storeList',
+    component: () => import('../views/store/list.vue')
+  }, {
+    path: '/setting/category/:params',
     name: 'settingCategory',
     component: () => import('../views/setting/category.vue')
   }, {
-    path: '/setting/main',
+    path: '/setting/main/:params',
     name: 'settingMain',
     component: () => import('../views/setting/main.vue')
   }]
+}, {
+  path: '/print/printSku/:id/:date',
+  name: 'printSku',
+  component: () => import('../views/print/printSku.vue')
+}, {
+  path: '/print/printStoreLog/:id/:type',
+  name: 'printStoreLog',
+  component: () => import('../views/print/printStoreLog.vue')
 }]
 
 const router = new VueRouter({

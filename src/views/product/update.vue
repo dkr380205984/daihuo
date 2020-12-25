@@ -1,6 +1,7 @@
 <template>
   <div id="productCreate"
-    class="createCtnNoRepeat">
+    class="createCtnNoRepeat"
+    v-loading="loading">
     <div class="header">
       <div class="title">产品修改</div>
     </div>
@@ -32,7 +33,8 @@
             <div class="line">
               <div class="eldom">
                 <el-select placeholder="请选择产品品类"
-                  v-model="product_type">
+                  v-model="product_type"
+                  disabled>
                   <el-option v-for="item in type_list"
                     :key="item.id"
                     :label="item.name"
@@ -224,6 +226,8 @@
                             v-model="itemRow[filterName(item.name)]"
                             @input="$forceUpdate()"
                             :placeholder="item.name">
+                            <template v-if="item.name==='成本价'||item.name==='零售价'"
+                              slot="append">元</template>
                           </el-input>
                           <el-upload v-if="!item.firstName && item.name==='图片'"
                             class="avatar-uploader"
@@ -265,27 +269,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { proType, product, getToken } from '@/assets/js/api'
-interface SkuInfo {
-  sku_id: string | number
-  price: number
-  sku_info: string
-  image_url: string
-  sku_code?: string
-}
-interface ProductForm {
-  name: string
-  category_id: number | string
-  category_info: string
-  sku_info: SkuInfo[]
-  client_id: number | string
-  brand_id: number | string
-  images: any[]
-  description: string
-  min_price: number
-  max_price: number
-  id?: string | number
-}
+import { proType, product, getToken, client } from '@/assets/js/api'
+import { SkuInfo, ProductForm } from '@/types/product'
 export default Vue.extend({
   data(): {
     table_data: {
@@ -298,6 +283,7 @@ export default Vue.extend({
     [propName: string]: any
   } {
     return {
+      loading: true,
       file_arr: [],
       post_data: { token: '' },
       product_name: '',
@@ -347,7 +333,12 @@ export default Vue.extend({
           {
             is_combine: false,
             is_required: true,
-            name: '单价'
+            name: '零售价'
+          },
+          {
+            is_combine: false,
+            is_required: true,
+            name: '成本价'
           },
           {
             is_combine: false,
@@ -448,7 +439,7 @@ export default Vue.extend({
         this.table_data.old_render_content.forEach((itemOld) => {
           let ifEqual = true
           for (const key of Object.keys(itemNew)) {
-            if (key !== '单价' && key !== 'sku编码' && key !== '图片') {
+            if (key !== '成本价' && key !== '零售价' && key !== 'sku编码' && key !== '图片') {
               if (itemNew[key] !== itemOld[key]) {
                 ifEqual = false
               }
@@ -519,10 +510,14 @@ export default Vue.extend({
           }
         })
         // 修复tslint不允许字符串访问对象的脑瘫设定
-        const price = '单价'
+        const price = '零售价'
+        const costPrice = '成本价'
         this.table_data.render_content.forEach((item: any) => {
           if (!item[price] && Number(item[price] !== 0)) {
-            msg = '单价未填写，单价可填0'
+            msg = '零售价未填写，零售价可填0'
+          }
+          if (!item[costPrice] && Number(item[costPrice] !== 0)) {
+            msg = '成本价未填写，成本价可填0'
           }
         })
       }
@@ -538,7 +533,8 @@ export default Vue.extend({
         return
       }
       // 修复tslint不允许字符串访问对象的脑瘫设定
-      const price = '单价'
+      const price = '零售价'
+      const costPrice = '成本价'
       const image = '图片'
       const formData: ProductForm = {
         id: this.$route.params.id,
@@ -550,6 +546,7 @@ export default Vue.extend({
             return {
               sku_id: index >= 9 ? index + 1 : '0' + (index + 1),
               price: item[price],
+              cost_price: item[costPrice],
               sku_info: JSON.stringify(item),
               image_url: item[image]
             }
@@ -691,11 +688,15 @@ export default Vue.extend({
     }
   },
   mounted() {
-    Promise.all([proType.list(), product.detail({ id: this.$route.params.id }), getToken()]).then((res) => {
-      this.type_list = res[0].data.data
-      this.getInfo(res[1].data.data)
-      this.post_data.token = res[2].data.data
-    })
+    Promise.all([proType.list(), product.detail({ id: this.$route.params.id }), getToken(), client.list()]).then(
+      (res) => {
+        this.type_list = res[0].data.data
+        this.getInfo(res[1].data.data)
+        this.post_data.token = res[2].data.data
+        this.client_list = res[3].data.data
+        this.loading = false
+      }
+    )
   }
 })
 </script>

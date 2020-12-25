@@ -1,6 +1,33 @@
 @import './../common.less';
 #orderList{
-  .opr{
-    margin-right: 12px;
+  .content{
+    .opr{
+      cursor: pointer;
+      padding: 0 8px;
+      border-right: 1px solid #E9E9E9;
+      height: 20px;
+      line-height: 20px;
+      &:nth-last-child(1){
+        border-right: 0;
+      }
+      &:nth-child(1){
+        padding-left: 0;
+      }
+    }
+  }
+  .popup{
+    .unshow{
+      display: none;
+    }
+    .uploadBtn{
+      font-size: @fontMiddle;
+      color: @font65;
+    }
+  }
+  .tips{
+    padding: 12px;
+    color: @font65;
+    font-size: @fontMiddle;
+    background: #fafafa;
   }
 }

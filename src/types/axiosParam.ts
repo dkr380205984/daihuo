@@ -1,9 +1,13 @@
 export interface ListParam {
-  page: number
-  limit: number
+  page?: number
+  limit?: number
   [propName: string]: any
 }
-export interface DeatailParam {
-  id: number | string,
+export interface DetailParam {
+  id?: number | string | number[] | string[]
   [propName: string]: any
+}
+
+export interface DeleteParam {
+  id: number | string
 }

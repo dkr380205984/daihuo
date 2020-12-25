@@ -45,14 +45,14 @@ export default Vue.extend({
   data(): { navList: NavInfo[]; [propName: string]: any } {
     return {
       navList: [
-        { name: '首页', url: '/index', active: true },
-        { name: '产品管理', url: '/product/list' },
-        { name: '库存管理', url: '/stock/list' },
-        { name: '订单管理', url: '/order/list' },
-        { name: '主播管理', url: '/index' },
-        { name: '个人中心', url: '/index' },
-        { name: '品类设置', url: '/setting/category' },
-        { name: '系统设置', url: '/setting/main' }
+        // { name: '首页', url: '/index', active: true },
+        { name: '产品管理', url: '/product/list/page=1&&keyword=&&date=&&client_id=' },
+        { name: '库存管理', url: '/store/list/page=1&&keyword=&&date=&&client_id=' },
+        { name: '出入库日志', url: '/store/logList/page=1&&keyword=&&date=&&type=' },
+        { name: '订单管理', url: '/order/list/page=1&&keyword=&&date=' },
+        // { name: '个人中心', url: '/index' },
+        { name: '品类设置', url: '/setting/category/page=1&&keyword=' },
+        { name: '系统设置', url: '/setting/main/page=1&&keyword=' }
       ]
     }
   }

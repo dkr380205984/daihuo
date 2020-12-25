@@ -16,8 +16,12 @@ Vue.use(mycomponent)
 // 注册公共方法后需要声明
 declare module 'vue/types/vue' {
   interface Vue {
+    $getHash: any,
     $clone: any,
     $getDataType: any
+    $mergeData: any
+    $diffDate: any
+    $getDate: any
   }
 }
 

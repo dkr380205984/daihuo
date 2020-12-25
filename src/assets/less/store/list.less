@@ -1,0 +1,34 @@
+@import './../common.less';
+.popup{
+  .boxCtn{
+    display: flex;
+    margin: 12px 0;
+    .box{
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      .label{
+        font-size: 24px;
+        color: @font65;
+      }
+      .number{
+        font-size: 22px;
+        margin: 12px 0;
+      }
+    }
+  }
+  .thead{
+    height: 40px!important;
+  }
+  .trow{
+    min-height: 40px!important;
+  }
+  .tcolumn{
+    min-height: 40px!important;
+  }
+  .tableCtn{
+    max-height: 500px;
+    overflow: auto;
+  }
+}
