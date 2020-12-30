@@ -1,3 +1,8 @@
+interface MapTitle {
+  title: string
+  key: string
+}
+
 const plugin = {
   /************************************
    *data:需要判断类型的数据
@@ -195,6 +200,46 @@ const plugin = {
     const month = date.getMonth() + 1
     const day = date.getDate()
     return year + '-' + (month < 10 ? ('0' + month) : month) + '-' + (day < 10 ? ('0' + day) : day)
+  },
+  downloadExcel(data: any[], mapTitle: MapTitle[], excelName: string) {
+    const orderElement = ''
+    const aLink = document.createElement('a')
+    const excelHeader = '<tr>' + mapTitle.map((item) =>
+      '<td style="text-align:left">' + item.title + '</td>').join('') + '</tr>'
+    const excelContent = data.map((itemData) => {
+      return '<tr>' + mapTitle.map((itemTitle) =>
+        '<td style="text-align:left">' + ((itemData[itemTitle.key] !== 0 && !itemData[itemTitle.key]) ?
+          '' : itemData[itemTitle.key]) + '</td>').join('') + '</tr>'
+    })
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+                      xmlns:x="urn:schemas-microsoft-com:office:excel"
+                      xmlns="http://www.w3.org/TR/REC-html40">
+                <meta http-equiv="content-type" content="application/vnd.ms-excel; charset="UTF-8">
+                <head>
+                  <!--[if gte mso 9]>
+                  <xml>
+                  <x:ExcelWorkbook>
+                    <x:ExcelWorksheets>
+                      <x:ExcelWorksheet>
+                        <x:Name>${excelName || 'worksheet1'}</x:Name>
+                        <x:WorksheetOptions>
+                          <x:DisplayGridlines/>
+                        </x:WorksheetOptions>
+                      </x:ExcelWorksheet>
+                    </x:ExcelWorksheets>
+                  </x:ExcelWorkbook>
+                  </xml>
+                  <![endif]-->
+                </head>
+                <body>
+                  ${orderElement}
+                  <table>${excelHeader}${excelContent.join('')}</table>
+                </body>
+              </html>`
+    const url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html)
+    aLink.href = url
+    aLink.download = (excelName ? excelName + '-' : '') + new Date().getTime() + '.xls'
+    aLink.click()
   }
 }
 export default {
@@ -205,5 +250,6 @@ export default {
     Vue.prototype.$mergeData = plugin.mergeData
     Vue.prototype.$diffDate = plugin.diffDate
     Vue.prototype.$getDate = plugin.getDate
+    Vue.prototype.$downloadExcel = plugin.downloadExcel
   }
 }

@@ -22,6 +22,7 @@ declare module 'vue/types/vue' {
     $mergeData: any
     $diffDate: any
     $getDate: any
+    $downloadExcel: any
   }
 }
 

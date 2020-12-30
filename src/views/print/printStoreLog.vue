@@ -3,7 +3,7 @@
     <div class="printTable small"
       v-for="itemClient in list"
       :key="itemClient.id">
-      <div style="text-align:center;line-height:41px;font-size:20px;font-weight:bold;letter-spacing:2px">围巾城{{$route.type==='1'?'入库':'出库'}}单</div>
+      <div style="text-align:center;line-height:41px;font-size:20px;font-weight:bold;letter-spacing:2px">围巾城{{$route.params.type==='1'?'入库':'出库'}}单</div>
       <div class="print_body">
         <div class="print_row bgGray">
           <span class="row_item center bgGray"
@@ -13,6 +13,8 @@
           <span class="row_item center">sku编码</span>
           <span class="row_item center"
             style="flex:1.5">款式</span>
+          <span class="row_item center"
+            style="flex:0.7">单价</span>
           <span class="row_item center"
             style="flex:0.7">数量</span>
           <span class="row_item center"
@@ -30,6 +32,8 @@
             <span class="row_item center"
               style="flex:1.5">{{getSkuName(itemClient.childrenMergeInfo[index-1].sku_info,itemClient.childrenMergeInfo[index-1].category_info)}}</span>
             <span class="row_item center"
+              style="flex:0.7">{{itemClient.childrenMergeInfo[index-1].price}}元</span>
+            <span class="row_item center"
               style="flex:0.7">{{itemClient.childrenMergeInfo[index-1].total_number}}</span>
             <span class="row_item center"
               style="flex:0.7">{{itemClient.childrenMergeInfo[index-1].total_price}}元</span>
@@ -46,6 +50,8 @@
               style="flex:0.7"></span>
             <span class="row_item center"
               style="flex:0.7"></span>
+            <span class="row_item center"
+              style="flex:0.7"></span>
           </template>
         </div>
         <div class="print_row">
@@ -53,12 +59,12 @@
           <span class="row_item center">{{total_price}}元</span>
           <span class="row_item center bgGray">打印日期</span>
           <span class="row_item center">{{$getDate(new Date())}}</span>
-          <span class="row_item center bgGray">收货人签字</span>
+          <span class="row_item center bgGray">{{$route.params.type==='1'?'发货':'收货'}}人签字</span>
           <span class="row_item center"></span>
         </div>
         <div class="print_row"
           style="border-bottom:0">
-          <span class="row_item center bgGray">供货单位</span>
+          <span class="row_item center bgGray">{{$route.params.type==='1'?'供货':'出库'}}单位</span>
           <span class="row_item center">{{itemClient.client_name}}</span>
           <span class="row_item center bgGray">制单员/电话</span>
           <span class="row_item center"></span>

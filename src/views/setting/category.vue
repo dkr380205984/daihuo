@@ -1,6 +1,7 @@
 <template>
   <div id="settingCategory">
-    <div class="listCtnNoRepeat">
+    <div class="listCtnNoRepeat"
+      v-loading="loading">
       <div class="header">
         <div class="title">系统设置</div>
         <div class="btnCtn">
@@ -11,8 +12,9 @@
       <div class="filterCtn">
         <span class="label">筛选</span>
         <div class="elCtn">
-          <el-input v-model="msg"
-            placeholder="搜索品类名称"></el-input>
+          <el-input v-model="keyword"
+            placeholder="搜索品类名称按回车搜索"
+            @change="getList"></el-input>
         </div>
         <div class="btnCtn">
           <div class="btn btnGray">重置</div>
@@ -43,7 +45,7 @@
                     {{item.name}}
                   </span>
                 </div>
-                <div class="tcolumn">品类单位</div>
+                <div class="tcolumn">{{item.unit}}</div>
                 <div class="tcolumn flexRow">
                   <span class="opr orange"
                     @click="updateForm(item)">修改</span>
@@ -285,7 +287,8 @@ import Vue from 'vue'
 export default Vue.extend({
   data() {
     return {
-      msg: '',
+      loading: true,
+      keyword: '',
       list: [],
       addTypeFlag: false,
       updateTypeFlag: false,
@@ -495,47 +498,59 @@ export default Vue.extend({
             message: '已取消删除'
           })
         })
+    },
+    getList() {
+      this.loading = true
+      proType
+        .list({
+          page: 1,
+          limit: 5,
+          name: this.keyword
+        })
+        .then((res) => {
+          if (res.data.status) {
+            this.list = res.data.data.map((item: { name: string; id: number; category_menu: any; unit: string }) => {
+              return {
+                showMore: false,
+                name: item.name,
+                id: item.id,
+                unit: item.unit,
+                category_menu: JSON.parse(item.category_menu).map(
+                  (itemChild: {
+                    name: any
+                    is_required: any
+                    is_combine: any
+                    category_menu: any[]
+                    commonUse: any
+                  }) => {
+                    return {
+                      name: itemChild.name,
+                      ifMust: itemChild.is_required, // 是否必填
+                      ifCompose: itemChild.is_combine, // 是否组合
+                      hasChild: itemChild.category_menu.length > 0, // 有无二级分类
+                      category_menu: itemChild.category_menu.map((itemSecond: { name: any; commonUse: any }) => {
+                        return {
+                          name: itemSecond.name,
+                          commonUse: itemSecond.commonUse,
+                          commonUseOld: itemSecond.commonUse,
+                          commonUseNew: ['']
+                        }
+                      }),
+                      commonUse: itemChild.commonUse,
+                      commonUseOld: itemChild.commonUse,
+                      commonUseNew: ['']
+                    }
+                  }
+                )
+              }
+            })
+            this.loading = false
+          }
+        })
     }
   },
   mounted() {
-    proType
-      .list({
-        page: 1,
-        limit: 5
-      })
-      .then((res) => {
-        if (res.data.status) {
-          this.list = res.data.data.map((item: { name: string; id: number; category_menu: any }) => {
-            return {
-              showMore: false,
-              name: item.name,
-              id: item.id,
-              category_menu: JSON.parse(item.category_menu).map(
-                (itemChild: { name: any; is_required: any; is_combine: any; category_menu: any[]; commonUse: any }) => {
-                  return {
-                    name: itemChild.name,
-                    ifMust: itemChild.is_required, // 是否必填
-                    ifCompose: itemChild.is_combine, // 是否组合
-                    hasChild: itemChild.category_menu.length > 0, // 有无二级分类
-                    category_menu: itemChild.category_menu.map((itemSecond: { name: any; commonUse: any }) => {
-                      return {
-                        name: itemSecond.name,
-                        commonUse: itemSecond.commonUse,
-                        commonUseOld: itemSecond.commonUse,
-                        commonUseNew: ['']
-                      }
-                    }),
-                    commonUse: itemChild.commonUse,
-                    commonUseOld: itemChild.commonUse,
-                    commonUseNew: ['']
-                  }
-                }
-              )
-            }
-          })
-          console.log(this.list)
-        }
-      })
+    this.getList()
   }
 })
 </script>

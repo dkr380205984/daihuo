@@ -28,7 +28,7 @@
         </el-carousel>
       </div>
       <div class="atRight">
-        <div class="title">仓储管理系统</div>
+        <div class="title">围巾城管理系统</div>
         <div class="welcome">欢迎登录</div>
         <div class="inputCtn">
           <el-input type="text"
@@ -59,7 +59,7 @@
 
 <script lang="ts">
 import { Vue } from 'vue-property-decorator'
-import { login } from '@/assets/js/api'
+import { login, user } from '@/assets/js/api'
 export default Vue.extend({
   data() {
     return {
@@ -89,8 +89,11 @@ export default Vue.extend({
           } else {
             window.localStorage.setItem('dhPassword', '')
           }
-          this.$message.success('登录成功')
-          this.$router.push('/setting/main/page=1&&keyword')
+          user.detail().then((resChild) => {
+            window.localStorage.setItem('userInfo', JSON.stringify(resChild.data.data))
+            this.$message.success('登录成功')
+            this.$router.push('/index/main')
+          })
         } else {
           this.$message.error({
             message: res.data.message

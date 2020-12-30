@@ -5,6 +5,7 @@ export interface UserInfo {
   user_name: string
   type: string // 管理权限
   status?: boolean // 状态
+  client_id?: string | number // 主播有隶属运营商
   desc?: string
 }
 
@@ -22,6 +23,6 @@ export interface ServiceInfo {
   id?: string | number
   phone: string
   name: string
-  contact: string,
+  user_name: string,
   desc: string
 }

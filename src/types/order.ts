@@ -11,6 +11,7 @@ export interface OrderInfo {
   order_code: string
   sku_code: string
   desc: string
+  number: number | string
   create_user: string
   create_time: string
   sku_info?: string

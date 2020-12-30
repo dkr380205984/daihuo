@@ -1,5 +1,6 @@
 <template>
-  <div class="listCtnNoRepeat"
+  <div id="productList"
+    class="listCtnNoRepeat"
     v-loading="loading">
     <div class="header">
       <div class="title">产品列表</div>
@@ -10,7 +11,8 @@
     </div>
     <div class="filterCtn">
       <span class="label">筛选</span>
-      <!-- <div class="elCtn">
+      <div class="elCtn"
+        style="width:120px">
         <el-select v-model="search_type"
           placeholder="选择搜索类型"
           @change="changeRouter(1)">
@@ -19,15 +21,29 @@
             :value="item.value"
             :label="item.name"></el-option>
         </el-select>
-      </div> -->
-      <div class="elCtn">
-        <el-input v-model="keyword"
-          placeholder="输入产品名称/sku编码搜索"
-          @change="changeRouter(1)"></el-input>
       </div>
       <div class="elCtn">
+        <el-input v-model="keyword"
+          placeholder="输入信息按回车搜索"
+          @change="changeRouter(1)"></el-input>
+      </div>
+      <div class="elCtn"
+        style="width:120px">
+        <el-select v-model="type"
+          placeholder="期货/现货"
+          @change="changeRouter(1)">
+          <el-option value="null"
+            label="全部"></el-option>
+          <el-option value="现货"
+            label="现货"></el-option>
+          <el-option value="期货"
+            label="期货"></el-option>
+        </el-select>
+      </div>
+      <div class="elCtn"
+        style="width:120px">
         <el-select v-model="client_id"
-          placeholder="搜索供货单位"
+          placeholder="供货单位"
           @change="changeRouter(1)"
           clearable>
           <el-option v-for="item in client_list"
@@ -36,15 +52,16 @@
             :label="item.name"></el-option>
         </el-select>
       </div>
-      <div class="elCtn">
-        <el-select v-model="if_self"
+      <div class="elCtn"
+        style="width:120px">
+        <el-select v-model="user_id"
           placeholder="搜索创建人"
           @change="changeRouter(1)"
           clearable>
-          <el-option value='0'
-            label="所有人"></el-option>
-          <el-option value='1'
-            label="自己"></el-option>
+          <el-option v-for="item in user_list"
+            :key="item.id"
+            :value="item.id"
+            :label="item.name"></el-option>
         </el-select>
       </div>
       <div class="elCtn">
@@ -62,7 +79,6 @@
         </el-date-picker>
       </div>
       <div class="btnCtn">
-        <div class="btn btnBlue">搜索</div>
         <div class="btn btnGray"
           @click="reset">重置</div>
       </div>
@@ -90,7 +106,30 @@
             v-for="item in list"
             :key="item.id">
             <div class="trow">
-              <div class="tcolumn">{{item.product_code}}</div>
+              <div class="tcolumn flexRow"
+                style="justify-content:space-between">
+                <span>
+                  <span class="circle"
+                    :class="{'green':item.type==='现货','orange':item.type==='期货'}">{{item.type==='现货'?'现':'期'}}</span>
+                  {{item.product_code}}
+                </span>
+                <el-tooltip v-if="item.is_recommend===1"
+                  class="item"
+                  effect="dark"
+                  content="取消推荐"
+                  placement="top">
+                  <i class="el-icon-open open"
+                    @click="recommendPro(item.id)"></i>
+                </el-tooltip>
+                <el-tooltip v-else
+                  class="item"
+                  effect="dark"
+                  content="点击推荐"
+                  placement="top">
+                  <i class="el-icon-turn-off off"
+                    @click="recommendPro(item.id)"></i>
+                </el-tooltip>
+              </div>
               <div class="tcolumn">{{item.name}}</div>
               <div class="tcolumn">
                 <zh-img-list :list="item.images"></zh-img-list>
@@ -99,7 +138,7 @@
               <div class="tcolumn">
                 <span class="blue">{{item.min_price + '元 ~ ' + item.max_price + '元'}}</span>
               </div>
-              <div class="tcolumn">缺字段</div>
+              <div class="tcolumn">{{item.user_name}}</div>
               <div class="tcolumn">{{item.create_time.substring(0,10)}}</div>
               <div class="tcolumn flexRow"
                 style="flex:1.5">
@@ -128,7 +167,7 @@
 
 <script lang="ts">
 import { Vue } from 'vue-property-decorator'
-import { product, client } from '@/assets/js/api'
+import { product, client, user } from '@/assets/js/api'
 export default Vue.extend({
   data(): { client_id: string | number; [propName: string]: any } {
     return {
@@ -141,17 +180,23 @@ export default Vue.extend({
         },
         {
           value: 1,
+          name: '产品编号'
+        },
+        {
+          value: 2,
           name: 'sku编码'
         }
       ],
       client_id: '',
       client_list: [],
-      if_self: '0',
+      user_id: '0',
+      user_list: [],
       keyword: '',
       page: 1,
       total: 1,
       list: [],
-      date: []
+      date: [],
+      type: 'null'
     }
   },
   methods: {
@@ -160,9 +205,15 @@ export default Vue.extend({
       product
         .list({
           page: this.page,
-          limit: 10
-          // start_time: this.date && this.date.length > 0 ? this.date[0] : '',
-          // end_time: this.date && this.date.length > 0 ? this.date[1] : ''
+          limit: 10,
+          product_code: this.search_type === 1 ? this.keyword : '',
+          sku_code: this.search_type === 2 ? this.keyword : '',
+          name: this.search_type === 0 ? this.keyword : '',
+          client_id: this.client_id,
+          user_id: this.user_id,
+          type: this.type === 'null' ? '' : this.type,
+          start_time: this.date && this.date.length > 0 ? this.date[0] : '',
+          end_time: this.date && this.date.length > 0 ? this.date[1] : ''
         })
         .then((res) => {
           this.list = res.data.data.items
@@ -171,7 +222,7 @@ export default Vue.extend({
         })
     },
     reset() {
-      this.$router.push('/product/list/page=1&&keyword=&&date=&&client_id=')
+      this.$router.push('/product/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0&&types=null')
     },
     changeRouter(page: number | string) {
       this.$router.push(
@@ -182,7 +233,13 @@ export default Vue.extend({
           '&&date=' +
           this.date +
           '&&client_id=' +
-          this.client_id
+          this.client_id +
+          '&&user_id=' +
+          this.user_id +
+          '&&type=' +
+          this.search_type +
+          '&&types=' +
+          this.type
       )
     },
     // 更新筛选条件
@@ -191,6 +248,9 @@ export default Vue.extend({
       this.page = Number(params.page)
       this.keyword = params.keyword
       this.client_id = params.client_id && Number(params.client_id)
+      this.user_id = params.user_id && Number(params.user_id)
+      this.search_type = params.type && Number(params.type)
+      this.type = params.types
       if (params.date !== 'null' && params.date !== '') {
         this.date = params.date.split(',')
       } else {
@@ -221,6 +281,18 @@ export default Vue.extend({
             message: '已取消删除'
           })
         })
+    },
+    recommendPro(id: string | number): void {
+      product
+        .recommendPro({
+          id
+        })
+        .then((res) => {
+          if (res.data.status) {
+            this.$message.success('操作成功')
+            this.getList()
+          }
+        })
     }
   },
   watch: {
@@ -236,10 +308,9 @@ export default Vue.extend({
   created() {
     this.getFilters()
     this.getList()
-    client.list().then((res) => {
-      if (res.data.status) {
-        this.client_list = res.data.data
-      }
+    Promise.all([client.list(), user.list()]).then((res) => {
+      this.client_list = res[0].data.data
+      this.user_list = res[1].data.data
     })
   }
 })

@@ -7,7 +7,8 @@
     </div>
     <div class="filterCtn">
       <span class="label">筛选</span>
-      <div class="elCtn">
+      <div class="elCtn"
+        style="width:150px">
         <el-select v-model="search_type"
           placeholder="选择搜索类型"
           @change="changeRouter(1)">
@@ -19,15 +20,28 @@
       </div>
       <div class="elCtn">
         <el-input v-model="keyword"
-          :placeholder="'输入' + search_type_list[search_type].name + '搜索'"
+          placeholder="输入信息按回车搜索"
           @change="changeRouter(1)"></el-input>
       </div>
-      <div class="elCtn">
+      <div class="elCtn"
+        style="width:150px">
         <el-select v-model="client_id"
           placeholder="搜索供货单位"
           @change="changeRouter(1)"
           clearable>
           <el-option v-for="item in client_list"
+            :key="item.id"
+            :value="item.id"
+            :label="item.name"></el-option>
+        </el-select>
+      </div>
+      <div class="elCtn"
+        style="width:150px">
+        <el-select v-model="user_id"
+          placeholder="搜索创建人"
+          @change="changeRouter(1)"
+          clearable>
+          <el-option v-for="item in user_list"
             :key="item.id"
             :value="item.id"
             :label="item.name"></el-option>
@@ -48,7 +62,6 @@
         </el-date-picker>
       </div>
       <div class="btnCtn">
-        <div class="btn btnBlue">搜索</div>
         <div class="btn btnGray"
           @click="reset">重置</div>
       </div>
@@ -208,7 +221,8 @@
     </div>
     <div class="popup"
       v-show="log_flag">
-      <div class="main">
+      <div class="main"
+        style="width:1000px">
         <div class="title">
           <div class="text">出入库日志</div>
           <i class="el-icon-close"
@@ -237,7 +251,9 @@
                     <div class="tcolumn">类型</div>
                     <div class="tcolumn">sku编码</div>
                     <div class="tcolumn">数量</div>
+                    <div class="tcolumn">单价</div>
                     <div class="tcolumn">仓库</div>
+                    <div class="tcolumn">出库单位</div>
                     <div class="tcolumn">操作人</div>
                     <div class="tcolumn">日期</div>
                     <div class="tcolumn">操作</div>
@@ -251,7 +267,9 @@
                       :class="{'orange':item.type===1,'blue':item.type===2}">{{item.type===1?'入库':'出库'}}</div>
                     <div class="tcolumn">{{item.sku.sku_code}}</div>
                     <div class="tcolumn">{{item.number}}</div>
+                    <div class="tcolumn">{{item.price}}元</div>
                     <div class="tcolumn">{{item.stock_name}}</div>
+                    <div class="tcolumn">{{item.client_name||'无'}}</div>
                     <div class="tcolumn">{{item.user_name}}</div>
                     <div class="tcolumn">{{item.create_time}}</div>
                     <div class="tcolumn">
@@ -308,7 +326,7 @@
 
 <script lang="ts">
 import { Vue } from 'vue-property-decorator'
-import { product, store, client } from '@/assets/js/api'
+import { product, store, client, user } from '@/assets/js/api'
 import { ProductForm, SkuInfo } from '@/types/product'
 import { SkuStoreSave } from '@/types/store'
 export default Vue.extend({
@@ -335,11 +353,20 @@ export default Vue.extend({
         },
         {
           value: 1,
+          name: '产品编号'
+        },
+        {
+          value: 2,
           name: 'sku编码'
         }
       ],
       client_id: '',
       client_list: [],
+      user_id: '0',
+      user_list: [],
+      keyword: '',
+      page: 1,
+      total: 1,
       log_flag: false,
       log_list: [],
       log_sts: {
@@ -348,16 +375,13 @@ export default Vue.extend({
       },
       sku_flag: false,
       sku_list: [],
-      keyword: '',
-      page: 1,
-      total: 1,
       list: [],
       date: []
     }
   },
   methods: {
     reset() {
-      this.$router.push('/store/list/page=1&&keyword=&&date=&&client_id=')
+      this.$router.push('/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0')
     },
     changeRouter(page: number | string) {
       this.$router.push(
@@ -368,7 +392,11 @@ export default Vue.extend({
           '&&date=' +
           this.date +
           '&&client_id=' +
-          this.client_id
+          this.client_id +
+          '&&user_id=' +
+          this.user_id +
+          '&&type=' +
+          this.search_type
       )
     },
     // 更新筛选条件
@@ -377,6 +405,8 @@ export default Vue.extend({
       this.page = Number(params.page)
       this.keyword = params.keyword
       this.client_id = params.client_id && Number(params.client_id)
+      this.user_id = params.user_id && Number(params.user_id)
+      this.search_type = params.type && Number(params.type)
       if (params.date !== 'null' && params.date !== '') {
         this.date = params.date.split(',')
       } else {
@@ -429,7 +459,9 @@ export default Vue.extend({
         return 120
       } else if (str === 'sku编码') {
         return 120
-      } else if (str === '单价(元)') {
+      } else if (str === '成本价') {
+        return 80
+      } else if (str === '零售价') {
         return 80
       } else if (str === '库存数') {
         return 80
@@ -458,9 +490,15 @@ export default Vue.extend({
       this.loading = true
       product
         .list({
-          client_id: this.client_id,
           page: this.page,
-          limit: 10
+          limit: 10,
+          product_code: this.search_type === 1 ? this.keyword : '',
+          sku_code: this.search_type === 2 ? this.keyword : '',
+          name: this.search_type === 0 ? this.keyword : '',
+          client_id: this.client_id,
+          user_id: this.user_id,
+          start_time: this.date && this.date.length > 0 ? this.date[0] : '',
+          end_time: this.date && this.date.length > 0 ? this.date[1] : ''
         })
         .then((res) => {
           if (res.data.data) {
@@ -471,6 +509,7 @@ export default Vue.extend({
         })
     },
     getLog(id: number, type: number = 1): void {
+      this.loading = true
       store
         .skuLog({
           stock_id: '',
@@ -478,6 +517,7 @@ export default Vue.extend({
           sku_code: type === 2 ? id : ''
         })
         .then((res) => {
+          this.loading = false
           if (type === 1) {
             this.log_list = res.data.data.items
             if (this.log_list.length > 0) {
@@ -487,7 +527,6 @@ export default Vue.extend({
               this.$message.warning('该产品暂无相关的出入库日志')
             }
           } else {
-            console.log(res)
             if (res.data.data.items.length > 0) {
               this.sku_list = this.$mergeData(res.data.data.items, {
                 mainRule: 'stock_id',
@@ -563,9 +602,10 @@ export default Vue.extend({
   created() {
     this.getFilters()
     this.getList()
-    Promise.all([store.list(), client.list()]).then((res) => {
+    Promise.all([store.list(), client.list(), user.list()]).then((res) => {
       this.store_arr = res[0].data.data
       this.client_list = res[1].data.data
+      this.user_list = res[2].data.data
     })
   }
 })

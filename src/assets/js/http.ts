@@ -24,17 +24,15 @@ axios.interceptors.response.use(
   (res) => {
     if (res.data.code === 200) {
       // do nothing
-    } else if (res.data.code === 1001) {
+    } else if (res.data.code === 403) {
       Message.Message.error(res.data.message)
-    } else if (res.data.code === 1002) {
-      Message.Message.error(res.data.message)
-    } else if (res.data.code === 1003) {
+    } else if (res.data.code === 500) {
+      Message.Message.error('服务器异常')
+    } else if (res.data.code === 404) {
+      Message.Message.error('数据不存在')
+    } else if (res.data.code === 401) {
       Message.Message.error('登录信息过期，请重新登录')
       router.push({ path: '/login' })
-    } else if (res.data.code === 1004) {
-      Message.Message.error(res.data.message)
-    } else if (res.data.code === 1005) {
-      Message.Message.error(res.data.message)
     }
     return res
   },

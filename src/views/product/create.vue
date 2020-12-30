@@ -58,6 +58,18 @@
             </div>
           </div>
           <div class="lineCtn">
+            <div class="label must">产品类型：</div>
+            <div class="line">
+              <div class="eldom"
+                style="line-height:32px">
+                <el-switch v-model="type"
+                  active-text="现货"
+                  inactive-text="期货">
+                </el-switch>
+              </div>
+            </div>
+          </div>
+          <div class="lineCtn">
             <div class="label">产品品牌：</div>
             <div class="line">
               <div class="eldom">
@@ -280,6 +292,7 @@ export default Vue.extend({
       post_data: { token: '' },
       product_name: '',
       product_type: '',
+      type: true,
       type_list: [],
       product_brand: '',
       product_image: [],
@@ -542,6 +555,7 @@ export default Vue.extend({
       const formData: ProductForm = {
         name: this.product_name,
         category_id: this.product_type,
+        type: this.type ? '现货' : '期货',
         category_info: JSON.stringify(this.render_data), // 备份render_data，在修改页还可以用，不然要根据table_data反刍一个render_data出来，太恶心了
         sku_info: this.table_data.render_content.map(
           (item, index): SkuInfo => {

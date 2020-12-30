@@ -5,6 +5,8 @@
     <div class="header">
       <div class="title">订单列表</div>
       <div class="btnCtn">
+        <div class="btn btnGreen"
+          @click="getStsList">订单发货统计</div>
         <div class="btn btnOrange"
           @click="print_flag = true">打印供货单</div>
         <div class="btn btnBlue"
@@ -13,7 +15,8 @@
     </div>
     <div class="filterCtn">
       <span class="label">筛选</span>
-      <div class="elCtn">
+      <div class="elCtn"
+        style="width:150px">
         <el-select v-model="search_type"
           placeholder="选择搜索类型"
           @change="changeRouter(1)">
@@ -25,7 +28,7 @@
       </div>
       <div class="elCtn">
         <el-input v-model="keyword"
-          :placeholder="'输入' + search_type_list[search_type].name + '搜索'"
+          :placeholder="'输入' + search_type_list[search_type].name + '按回车搜索'"
           @change="changeRouter(1)"></el-input>
       </div>
       <div class="elCtn">
@@ -59,7 +62,7 @@
         <el-table-column fixed
           prop="sku_code"
           label="sku编码"
-          width="160">
+          width="170">
         </el-table-column>
         <el-table-column prop="presenter"
           label="来源主播"
@@ -75,10 +78,14 @@
         </el-table-column>
         <el-table-column prop="product_name"
           label="产品名称"
-          width="190">
+          width="210">
         </el-table-column>
         <el-table-column prop="price"
           label="产品价格(元)"
+          width="120">
+        </el-table-column>
+        <el-table-column prop="number"
+          label="下单数量"
           width="120">
         </el-table-column>
         <el-table-column prop="province"
@@ -107,7 +114,7 @@
         </el-table-column>
         <el-table-column label="操作"
           fixed="right"
-          width="150">
+          width="120">
           <template scope="item">
             <span class="opr orange"
               @click="getOrderDetail(item.row)">修改</span>
@@ -232,6 +239,79 @@
         </div>
       </div>
     </div>
+    <div class="popup"
+      v-show="sts_flag">
+      <div class="main">
+        <div class="title">
+          <div class="text">订单发货统计</div>
+          <i class="el-icon-close"
+            @click="sts_flag=false"></i>
+        </div>
+        <div class="content"
+          style="padding-right:40px">
+          <div class="tips">请筛选日期进行统计，尽量不要超过七天，默认为今日订单统计</div>
+          <div style="margin:24px 0">
+            <span style="color:rgba(0,0,0,.65);font-size:14px">选择日期：</span>
+            <el-date-picker @change="getStsList"
+              v-model="sts_date"
+              style="width:290px"
+              class="filter_item"
+              type="daterange"
+              align="right"
+              unlink-panels
+              value-format="yyyy-MM-dd"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
+          </div>
+          <div class="tableCtn">
+            <div class="thead">
+              <div class="trowCtn">
+                <div class="trow">
+                  <div class="tcolumn"
+                    style="flex:0.5">序号</div>
+                  <div class="tcolumn">SKU编码</div>
+                  <div class="tcolumn">规格</div>
+                  <div class="tcolumn"
+                    style="align-items:center">图片</div>
+                  <div class="tcolumn">下单数</div>
+                  <div class="tcolumn">库存数</div>
+                  <div class="tcolumn">待入库</div>
+                </div>
+              </div>
+            </div>
+            <div class="tbody">
+              <div class="trowCtn">
+                <div class="trow"
+                  v-for="(item,index) in sts_list"
+                  :key="index">
+                  <div class="tcolumn"
+                    style="flex:0.5">{{index+1}}</div>
+                  <div class="tcolumn">{{item.sku_code}}</div>
+                  <div class="tcolumn">{{getSkuName(item.sku_info,item.category_info)}}</div>
+                  <div class="tcolumn">
+                    <el-image style="width:60px;height:40px;padding:10px 20px"
+                      :src="item.image?item.image:require('@/assets/image/noPic.jpg')"
+                      :preview-src-list="item.image?[item.image]:[require('@/assets/image/noPic.jpg')]">
+                    </el-image>
+                  </div>
+                  <div class="tcolumn">{{item.number}}</div>
+                  <div class="tcolumn">{{item.store}}</div>
+                  <div class="tcolumn">{{item.wait_push}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="opr">
+          <div class="btn btnGray"
+            @click="sts_flag=false">取消</div>
+          <div class="btn btnBlue"
+            @click="goExcel">导出excel</div>
+        </div>
+      </div>
+    </div>
     <div class="sidePopup"
       v-if="update_flag">
       <div class="main">
@@ -341,9 +421,19 @@
 
 <script lang="ts">
 import { Vue } from 'vue-property-decorator'
-import { order, user, client } from '@/assets/js/api'
+import { order, user, client, statistics } from '@/assets/js/api'
 import { OrderInfo } from '@/types/order'
 import { SkuInfo } from '@/types/product'
+interface StsData {
+  image: string
+  number: number
+  sku_code: string
+  sku_id: number
+  store: number
+  wait_push: number
+  sku_info: string
+  category_info: string
+}
 export default Vue.extend({
   data(): { file_list: any[]; update_info: OrderInfo; [propName: string]: any } {
     return {
@@ -374,7 +464,8 @@ export default Vue.extend({
         desc: '',
         create_user: '',
         create_time: '',
-        sku_info: ''
+        sku_info: '',
+        number: ''
       },
       search_type: 0,
       search_type_list: [
@@ -385,27 +476,89 @@ export default Vue.extend({
         {
           value: 1,
           name: 'sku编码'
+        },
+        {
+          value: 2,
+          name: '产品编号'
+        },
+        {
+          value: 3,
+          name: '产品名称'
         }
       ],
       keyword: '',
       date: [],
       client_list: [],
       client_id: '',
-      print_date: []
+      print_date: [],
+      sts_list: [],
+      sts_flag: false,
+      sts_date: []
     }
   },
   methods: {
+    // 把非组合项找出来
+    getUnCombine(categoryInfo: string): string[] {
+      const categoryInfoArray = JSON.parse(categoryInfo)
+      const returnObj = [] as string[]
+      categoryInfoArray.forEach((item: any) => {
+        if (!item.is_combine) {
+          if (!item.keyArr) {
+            returnObj.push(item.name)
+          } else {
+            if (item.keyArr instanceof Array) {
+              returnObj.push(item.keyArr.join(','))
+            } else {
+              returnObj.push(Object.keys(item.keyArr).join(','))
+            }
+          }
+        }
+      })
+      return returnObj
+    },
+    getSkuName(skuInfo: string, categoryInfo: string): string {
+      let returnStr = ''
+      const skuInfoSelf = JSON.parse(skuInfo)
+      const deleteObj = this.getUnCombine(categoryInfo)
+      const price = '零售价'
+      const costPrice = '成本价'
+      const storeNum = '库存数'
+      const image = '图片'
+      const sku = 'sku编码'
+      delete skuInfoSelf[price]
+      delete skuInfoSelf[costPrice]
+      delete skuInfoSelf[storeNum]
+      delete skuInfoSelf[image]
+      delete skuInfoSelf[sku]
+      deleteObj.forEach((item: string) => {
+        delete skuInfoSelf[item]
+      })
+      Object.keys(skuInfoSelf).forEach((key) => {
+        returnStr = returnStr + skuInfoSelf[key] + '/'
+      })
+      return returnStr.substring(0, returnStr.length - 1)
+    },
     reset() {
-      this.$router.push('/order/list/page=1&&keyword=&&date=')
+      this.$router.push('/order/list/page=1&&keyword=&&date=&&type=0')
     },
     changeRouter(page: number | string) {
-      this.$router.push('/order/list/page=' + (page || 1) + '&&keyword=' + this.keyword + '&&date=' + this.date)
+      this.$router.push(
+        '/order/list/page=' +
+          (page || 1) +
+          '&&keyword=' +
+          this.keyword +
+          '&&date=' +
+          this.date +
+          '&&type=' +
+          this.search_type
+      )
     },
     // 更新筛选条件
     getFilters() {
       const params = this.$getHash(this.$route.params.params)
       this.page = Number(params.page)
       this.keyword = params.keyword
+      this.search_type = params.type && Number(params.type)
       if (params.date !== 'null' && params.date !== '') {
         this.date = params.date.split(',')
       } else {
@@ -419,11 +572,12 @@ export default Vue.extend({
     uploadOrder(): void {
       const formData = new FormData()
       formData.append('file', this.file_once[0])
-      formData.append('presenter', '1')
+      formData.append('presenter', this.presenter)
       formData.append('source', this.source)
       order.import(formData).then((res: any) => {
         if (res.data.status) {
           this.$message.success('导入成功')
+          this.getList()
           this.import_flag = false
         }
       })
@@ -453,6 +607,7 @@ export default Vue.extend({
           create_time: item.create_time.substring(0, 10),
           create_user: item.create_user,
           price: (sku[price] || 0) + '元',
+          number: item.number,
           desc: item.desc
         }
       })
@@ -469,8 +624,14 @@ export default Vue.extend({
       this.loading = true
       order
         .list({
+          product_code: this.search_type === 2 ? this.keyword : '',
+          sku_code: this.search_type === 1 ? this.keyword : '',
+          product_name: this.search_type === 3 ? this.keyword : '',
+          order_code: this.search_type === 0 ? this.keyword : '',
           page: this.page,
-          limit: 10
+          limit: 10,
+          start_time: this.date && this.date.length > 0 ? this.date[0] : '',
+          end_time: this.date && this.date.length > 0 ? this.date[1] : ''
         })
         .then((res) => {
           this.list = this.formAdapter(res.data.data.items)
@@ -508,6 +669,56 @@ export default Vue.extend({
         return
       }
       window.open('/print/printSku/' + this.client_id + '/' + this.print_date.join(','))
+    },
+    filterSts(data: { [propName: string]: StsData }): StsData[] {
+      const returnArr = [] as StsData[]
+      Object.keys(data).forEach((key) => {
+        returnArr.push(data[key])
+      })
+      return returnArr
+    },
+    getStsList(): void {
+      console.log(this.sts_date)
+      statistics
+        .dispatchSts({
+          start_time: this.sts_date && this.sts_date.length > 0 ? this.sts_date[0] : '',
+          end_time: this.sts_date && this.sts_date.length > 0 ? this.sts_date[1] : ''
+        })
+        .then((res) => {
+          console.log(res)
+          this.sts_list = this.filterSts(res.data.data)
+          console.log(this.sts_list)
+          this.sts_flag = true
+        })
+    },
+    goExcel() {
+      if (this.sts_list.length === 0) {
+        this.$message.error('至少有一条发货统计才能导出')
+        return
+      }
+      const data = this.sts_list.map((item: StsData, index: number) => {
+        return {
+          index: index + 1,
+          sku_code: item.sku_code,
+          iamge: item.image,
+          number: item.number,
+          store: item.store,
+          wait_push: item.wait_push,
+          size: this.getSkuName(item.sku_info, item.category_info)
+        }
+      })
+      this.$downloadExcel(
+        data,
+        [
+          { title: '序号', key: 'index' },
+          { title: 'SKU编码', key: 'sku_code' },
+          { title: '规格', key: 'size' },
+          { title: '下单数', key: 'number' },
+          { title: '库存数', key: 'store' },
+          { title: '待入库', key: 'wait_push' }
+        ],
+        '订单发货统计表'
+      )
     }
   },
   watch: {
@@ -521,11 +732,17 @@ export default Vue.extend({
     }
   },
   mounted() {
-    Promise.all([client.list(), user.list()]).then((res) => {
+    Promise.all([
+      client.list(),
+      user.list({
+        type: 3
+      })
+    ]).then((res) => {
       this.client_list = res[0].data.data
-      this.user_list = res[1].data.data.items
+      this.user_list = res[1].data.data
     })
     this.print_date = [this.$getDate(new Date()), this.$getDate(new Date(new Date().getTime() + 24 * 60 * 60 * 1000))]
+    this.sts_date = [this.$getDate(new Date()), this.$getDate(new Date(new Date().getTime() + 24 * 60 * 60 * 1000))]
     this.getList()
   }
 })

@@ -1,6 +1,7 @@
 <template>
   <div id="settingMain"
-    class="detailCtnNoRepeat listCtnNoRepeat">
+    class="detailCtnNoRepeat listCtnNoRepeat"
+    v-loading="loading">
     <div class="header">
       <div class="title">系统设置</div>
     </div>
@@ -9,15 +10,16 @@
         <div class="contentCtn"
           style="padding-left:20px;padding-right:20px">
           <el-tabs v-model="activeName"
-            @tab-click="handleClick">
+            @tab-click="changeRouter(1,true)">
             <el-tab-pane label="人员管理"
               name="user">
               <div class="content">
                 <div class="filterCtn">
                   <span class="label">筛选</span>
                   <div class="elCtn">
-                    <el-input v-model="msg"
-                      placeholder="搜索用户姓名"></el-input>
+                    <el-input v-model="keyword"
+                      placeholder="搜索用户姓名"
+                      @change="changeRouter(1)"></el-input>
                   </div>
                   <div class="btnCtn">
                     <div class="btn btnBlue"
@@ -31,7 +33,7 @@
                         <div class="tcolumn">用户帐号</div>
                         <div class="tcolumn">手机号</div>
                         <div class="tcolumn">姓名</div>
-                        <div class="tcolumn">权限</div>
+                        <div class="tcolumn">身份</div>
                         <div class="tcolumn">状态</div>
                         <div class="tcolumn">创建日期</div>
                         <div class="tcolumn">操作</div>
@@ -46,10 +48,10 @@
                         <div class="tcolumn">{{item.user_name}}</div>
                         <div class="tcolumn">{{item.phone}}</div>
                         <div class="tcolumn">{{item.name}}</div>
-                        <div class="tcolumn">{{item.type|filterType}}</div>
+                        <div class="tcolumn">{{item.type===1?'平台人员':item.type===2?'运营商':'主播'}}</div>
                         <div class="tcolumn"
-                          :class="{'green':item.status===1,'red':item.status!==1}">{{item.status===1?'启用':'禁用'}}</div>
-                        <div class="tcolumn">{{item.created_at.substring(0,10)}}</div>
+                          :class="{'green':item.status===1,'red':item.status!==1}">{{item.status===1?'已启用':'已禁用'}}</div>
+                        <div class="tcolumn">{{item.created_at?item.created_at.substring(0,10):''}}</div>
                         <div class="tcolumn flexRow">
                           <span class="opr orange"
                             @click="updateUser(item)">修改</span>
@@ -63,14 +65,16 @@
                 </div>
               </div>
             </el-tab-pane>
-            <el-tab-pane label="仓库管理"
+            <el-tab-pane v-if="user_type===1"
+              label="仓库管理"
               name="store">
               <div class="content">
                 <div class="filterCtn">
                   <span class="label">筛选</span>
                   <div class="elCtn">
-                    <el-input v-model="msg"
-                      placeholder="搜索用户姓名"></el-input>
+                    <el-input v-model="keyword"
+                      placeholder="搜索用户姓名"
+                      @change="changeRouter(1)"></el-input>
                   </div>
                   <div class="btnCtn">
                     <div class="btn btnBlue"
@@ -107,14 +111,16 @@
                 </div>
               </div>
             </el-tab-pane>
-            <el-tab-pane label="供应商管理"
+            <el-tab-pane v-if="user_type===1"
+              label="供应商管理"
               name="client">
               <div class="content">
                 <div class="filterCtn">
                   <span class="label">筛选</span>
                   <div class="elCtn">
-                    <el-input v-model="msg"
-                      placeholder="搜索用户姓名"></el-input>
+                    <el-input v-model="keyword"
+                      placeholder="搜索用户姓名"
+                      @change="changeRouter(1)"></el-input>
                   </div>
                   <div class="btnCtn">
                     <div class="btn btnBlue"
@@ -157,14 +163,16 @@
                 </div>
               </div>
             </el-tab-pane>
-            <el-tab-pane label="运营商管理"
+            <el-tab-pane v-if="user_type===1"
+              label="运营商管理"
               name="service">
               <div class="content">
                 <div class="filterCtn">
                   <span class="label">筛选</span>
                   <div class="elCtn">
-                    <el-input v-model="msg"
-                      placeholder="搜索运营商名称"></el-input>
+                    <el-input v-model="keyword"
+                      placeholder="搜索用户姓名"
+                      @change="changeRouter(1)"></el-input>
                   </div>
                   <div class="btnCtn">
                     <div class="btn btnBlue"
@@ -178,6 +186,7 @@
                         <div class="tcolumn">运营商名称</div>
                         <div class="tcolumn">负责人</div>
                         <div class="tcolumn">联系方式</div>
+                        <div class="tcolumn">状态</div>
                         <div class="tcolumn">备注信息</div>
                         <div class="tcolumn">操作</div>
                       </div>
@@ -189,12 +198,17 @@
                         v-for="item in service_list"
                         :key="item.id">
                         <div class="tcolumn">{{item.name}}</div>
-                        <div class="tcolumn">{{item.contact}}</div>
+                        <div class="tcolumn">{{item.user_name}}</div>
                         <div class="tcolumn">{{item.phone}}</div>
+                        <div class="tcolumn"
+                          :class="{'green':item.status===1,'red':item.status!==1}">{{item.status===1?'已启用':'已禁用'}}</div>
                         <div class="tcolumn">{{item.desc}}</div>
                         <div class="tcolumn flexRow">
-                          <span class="opr blue">详情</span>
-                          <span class="opr orange">修改</span>
+                          <span class="opr orange"
+                            @click="updateService(item)">修改</span>
+                          <span class="opr red"
+                            @click="banService(item.id,item.status)"
+                            :class="{'red':item.status===1,'green':item.status!==1}">{{item.status===1?'禁用':'启用'}}</span>
                         </div>
                       </div>
                     </div>
@@ -207,6 +221,8 @@
       </div>
       <div class="pageCtn">
         <el-pagination background
+          :current-page.sync="page"
+          :page-size="10"
           layout="prev, pager, next"
           :total="total">
         </el-pagination>
@@ -249,33 +265,19 @@
             </div>
           </div>
           <div class="editCtn">
-            <div class="label">用户身份
-              <span class="explanation">(必填)</span>
+            <div class="label">用户类型
+              <span class="explanation">(必选)</span>
             </div>
             <div class="inputCtn">
               <el-select v-model="user_info.type"
-                placeholder="请选择用户身份">
+                placeholder="请选择用户类型">
                 <el-option v-for="item in power_arr"
                   :key="item.value"
-                  :value="item.value"
-                  :label="item.label"></el-option>
+                  :label="item.label"
+                  :value="item.value"></el-option>
               </el-select>
             </div>
           </div>
-          <!-- <div class="editCtn">
-            <div class="label">用户状态
-              <span class="explanation">(必选)</span>
-            </div>
-            <div class="inputCtn"
-              style="line-height:32px">
-              <el-switch v-model="user_info.state"
-                active-color="#01B48C"
-                inactive-color="#F5222D"
-                active-text="启用"
-                inactive-text="禁用">
-              </el-switch>
-            </div>
-          </div> -->
           <div class="editCtn">
             <div class="label">备注信息
             </div>
@@ -400,12 +402,12 @@
       </div>
     </div>
     <div class="sidePopup"
-      v-if="add_service_flag">
+      v-if="add_service_flag || update_service_flag">
       <div class="main">
         <div class="title">
-          <div class="text">添加运营商</div>
+          <div class="text">{{add_service_flag?'添加':'修改'}}运营商</div>
           <i class="el-icon-close"
-            @click="add_service_flag = false"></i>
+            @click="add_service_flag = false;update_service_flag = false"></i>
         </div>
         <div class="content">
           <div class="editCtn">
@@ -421,7 +423,7 @@
             <div class="label">负责人
             </div>
             <div class="inputCtn">
-              <el-input v-model="service_info.contact"
+              <el-input v-model="service_info.user_name"
                 placeholder="请输入联系人姓名"></el-input>
             </div>
           </div>
@@ -446,9 +448,10 @@
         <div class="oprCtn">
           <div class="btnCtn">
             <div class="btn btnGray"
-              @click="add_service_flag = false">取消</div>
-            <div class="btn btnBlue"
-              @click="saveService">添加</div>
+              @click="add_service_flag = false;update_service_flag = false">取消</div>
+            <div class="btn"
+              :class="{'btnBlue':add_service_flag,'btnOrange':update_service_flag}"
+              @click="saveService">{{add_service_flag?'添加':'修改'}}</div>
           </div>
         </div>
       </div>
@@ -461,7 +464,7 @@ import Vue from 'vue'
 import { StoreInfo } from '@/types/store'
 import { ClientInfo } from '@/types/client'
 import { UserInfo, ServiceInfo } from '@/types/setting'
-import { store, client, user } from '@/assets/js/api'
+import { store, client, user, service } from '@/assets/js/api'
 export default Vue.extend({
   data(): {
     user_info: UserInfo
@@ -475,7 +478,8 @@ export default Vue.extend({
     [propName: string]: any
   } {
     return {
-      msg: '',
+      loading: true,
+      keyword: '',
       activeName: 'user',
       add_user_flag: false,
       update_user_flag: false,
@@ -484,8 +488,9 @@ export default Vue.extend({
         phone: '',
         name: '',
         desc: '',
-        type: '' // 权限
+        type: ''
       },
+      user_type: 1,
       user_list: [],
       power_arr: [
         {
@@ -523,56 +528,110 @@ export default Vue.extend({
       service_list: [],
       service_info: {
         name: '',
-        contact: '',
+        user_name: '',
         phone: '',
         desc: ''
       },
-      total: 0
+      total: 0,
+      page: 1
+    }
+  },
+  watch: {
+    page(newVal) {
+      this.changeRouter(newVal)
+    },
+    $route(newVal) {
+      // 点击返回的时候更新下筛选条件
+      this.getFilters()
+      this.getNowList()
     }
   },
   methods: {
-    handleClick() {
+    changeRouter(page: number | string, reset?: boolean) {
+      if (reset) {
+        this.keyword = ''
+      }
+      this.$router.push('/setting/main/page=' + (page || 1) + '&&keyword=' + this.keyword + '&&type=' + this.activeName)
+    },
+    // 更新筛选条件
+    getFilters() {
+      const params = this.$getHash(this.$route.params.params)
+      this.page = Number(params.page)
+      this.keyword = params.keyword
+      this.activeName = params.type
+    },
+    getNowList() {
       if (this.activeName === 'store') {
         this.getStoreList()
       } else if (this.activeName === 'client') {
         this.getClientList()
+      } else if (this.activeName === 'service') {
+        this.getServiceList()
+      } else if (this.activeName === 'user') {
+        this.getUserList()
       }
     },
     getStoreList(): void {
+      this.loading = true
       store
         .list({
-          page: 1,
+          name: this.keyword,
+          page: this.page,
           limit: 10
         })
         .then((res) => {
           if (res.data.status) {
-            this.store_list = res.data.data
+            this.store_list = res.data.data.items
+            this.total = res.data.data.total
+            this.loading = false
           }
         })
     },
     getClientList(): void {
+      this.loading = true
       client
         .list({
-          page: 1,
+          name: this.keyword,
+          page: this.page,
           limit: 10
         })
         .then((res) => {
           if (res.data.status) {
             this.client_list = res.data.data.items
             this.total = res.data.data.total
+            this.loading = false
           }
         })
     },
     getUserList(): void {
+      this.loading = true
       user
         .list({
-          page: 1,
+          name: this.keyword,
+          page: this.page,
           limit: 10
         })
         .then((res) => {
           if (res.data.status) {
             this.user_list = res.data.data.items
             this.total = res.data.data.total
+            this.loading = false
+          }
+        })
+    },
+    getServiceList(): void {
+      this.loading = true
+      service
+        .list({
+          name: this.keyword,
+          page: this.page,
+          limit: 10
+        })
+        .then((res) => {
+          if (res.data.status) {
+            this.service_list = res.data.data.items
+            this.total = res.data.data.total
+            this.loading = false
           }
         })
     },
@@ -583,7 +642,7 @@ export default Vue.extend({
         phone: '',
         name: '',
         desc: '',
-        type: '' // 权限
+        type: '' // 类型拿用户信息
       }
     },
     addStore(): void {
@@ -607,37 +666,58 @@ export default Vue.extend({
       this.add_service_flag = true
       this.service_info = {
         name: '',
-        contact: '',
+        user_name: '',
         phone: '',
         desc: ''
       }
     },
     saveUser(): void {
+      if (!this.userCheck()) {
+        return
+      }
       user.save(this.user_info).then((res) => {
         if (res.data.status) {
           this.$message.success('添加成功')
           this.add_user_flag = false
+          this.getUserList()
         }
       })
     },
     saveStore(): void {
+      if (!this.storeCheck()) {
+        return
+      }
       store.storeSave(this.store_info).then((res) => {
         if (res.data.status) {
           this.$message.success('添加成功')
           this.add_store_flag = false
+          this.getStoreList()
         }
       })
     },
     saveClient(): void {
+      if (!this.clientCheck()) {
+        return
+      }
       client.save(this.client_info).then((res) => {
         if (res.data.status) {
           this.$message.success('添加成功')
           this.add_client_flag = false
+          this.getClientList()
         }
       })
     },
     saveService(): void {
-      console.log('hjaa')
+      if (!this.serviceCheck()) {
+        return
+      }
+      service.save(this.service_info).then((res) => {
+        if (res.data.status) {
+          this.$message.success('添加成功')
+          this.add_service_flag = false
+          this.getServiceList()
+        }
+      })
     },
     banUser(id: number, status: number) {
       this.$confirm(status === 1 ? '禁用该帐号会导致帐号不能登录, 是否继续?' : '是否重新启用该账号', '提示', {
@@ -656,7 +736,28 @@ export default Vue.extend({
         .catch(() => {
           this.$message({
             type: 'info',
-            message: '已取消删除'
+            message: '已取消禁用'
+          })
+        })
+    },
+    banService(id: number, status: number) {
+      this.$confirm(status === 1 ? '禁用该帐号会导致帐号不能登录, 是否继续?' : '是否重新启用该账号', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          service.ban({ id }).then((res) => {
+            if (res.data.status) {
+              this.$message.success('操作成功')
+              this.getServiceList()
+            }
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消禁用'
           })
         })
     },
@@ -675,6 +776,57 @@ export default Vue.extend({
     updateService(serviceInfo: ServiceInfo) {
       this.update_service_flag = true
       this.service_info = serviceInfo
+    },
+    userCheck(): boolean {
+      if (!this.user_info.phone) {
+        this.$message.error('请输入手机号')
+        return false
+      }
+      if (!this.user_info.user_name) {
+        this.user_info.user_name = this.user_info.phone
+      }
+      if (!this.user_info.name) {
+        this.$message.error('请输入姓名')
+        return false
+      }
+      return true
+    },
+    storeCheck(): boolean {
+      if (!this.store_info.name) {
+        this.$message.error('请输入仓库名称')
+        return false
+      }
+      return true
+    },
+    clientCheck(): boolean {
+      if (!this.client_info.name) {
+        this.$message.error('请输入供应商名称')
+        return false
+      }
+      if (!this.client_info.phone) {
+        this.$message.error('请输入联系方式')
+        return false
+      }
+      if (!this.client_info.prefix) {
+        this.$message.error('请输入供应商简称')
+        return false
+      }
+      if (!this.client_info.type) {
+        this.$message.error('请输入供应商类型')
+        return false
+      }
+      return true
+    },
+    serviceCheck(): boolean {
+      if (!this.service_info.name) {
+        this.$message.error('请输入运营商名称')
+        return false
+      }
+      if (!this.service_info.phone) {
+        this.$message.error('请输入联系方式')
+        return false
+      }
+      return true
     }
   },
   filters: {
@@ -689,7 +841,33 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.getUserList()
+    this.getFilters()
+    this.getNowList()
+    const userInfo = JSON.parse(window.localStorage.getItem('userInfo') as string)
+    if (userInfo.type === 1) {
+      this.power_arr = [
+        {
+          value: 1,
+          label: '平台'
+        },
+        {
+          value: 2,
+          label: '运营'
+        }
+      ]
+    } else if (userInfo.type === 2) {
+      this.power_arr = [
+        {
+          value: 2,
+          label: '运营'
+        },
+        {
+          value: 3,
+          label: '主播'
+        }
+      ]
+    }
+    this.user_type = userInfo.type
   }
 })
 </script>

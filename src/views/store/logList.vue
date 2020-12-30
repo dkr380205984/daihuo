@@ -4,18 +4,32 @@
     <div class="header">
       <div class="title">库存日志列表</div>
       <div class="btnCtn">
-        <div class="btn btnBlue"
+        <div class="btn btnOrange"
           @click="goPrint">打印单据</div>
+        <div class="btn btnBlue"
+          @click="goExcel">导出excel</div>
       </div>
     </div>
     <div class="filterCtn">
       <span class="label">筛选</span>
-      <div class="elCtn">
-        <el-input v-model="keyword"
-          placeholder="输入sku编码搜索"
-          @change="changeRouter(1)"></el-input>
+      <div class="elCtn"
+        style="width:150px">
+        <el-select v-model="search_type"
+          placeholder="选择搜索类型"
+          @change="changeRouter(1)">
+          <el-option v-for="item in search_type_list"
+            :key="item.value"
+            :value="item.value"
+            :label="item.name"></el-option>
+        </el-select>
       </div>
       <div class="elCtn">
+        <el-input v-model="keyword"
+          placeholder="输入信息按回车搜索"
+          @change="changeRouter(1)"></el-input>
+      </div>
+      <div class="elCtn"
+        style="width:150px">
         <el-select v-model="type"
           placeholder="操作类型"
           @change="changeRouter(1)">
@@ -27,10 +41,23 @@
             label="出库"></el-option>
         </el-select>
       </div>
-      <div class="elCtn">
+      <div class="elCtn"
+        style="width:150px">
+        <el-select v-model="store_id"
+          placeholder="筛选仓库"
+          clearable
+          @change="changeRouter(1)">
+          <el-option v-for="item in store_list"
+            :key="item.id"
+            :value="item.id"
+            :label="item.name"></el-option>
+        </el-select>
+      </div>
+      <div class="elCtn"
+        style="width:290px">
         <el-date-picker @change="changeRouter(1)"
-          v-model="date"
           style="width:290px"
+          v-model="date"
           class="filter_item"
           type="daterange"
           align="right"
@@ -42,59 +69,85 @@
         </el-date-picker>
       </div>
       <div class="btnCtn">
-        <div class="btn btnBlue">搜索</div>
         <div class="btn btnGray"
           @click="reset">重置</div>
       </div>
     </div>
     <div class="content">
-      <div class="tableCtn">
-        <div class="thead">
-          <div class="trowCtn">
-            <div class="trow">
-              <div class="tcolumn">
-                <el-checkbox v-model="chooseAll">产品编号</el-checkbox>
-              </div>
-              <div class="tcolumn">操作类型</div>
-              <div class="tcolumn">产品名称</div>
-              <div class="tcolumn">sku编码</div>
-              <div class="tcolumn"
-                style="flex:1.5">规格</div>
-              <div class="tcolumn">数量</div>
-              <div class="tcolumn">仓库</div>
-              <div class="tcolumn">操作人</div>
-              <div class="tcolumn">日期</div>
-              <div class="tcolumn">操作</div>
-            </div>
-          </div>
-        </div>
-        <div class="tbody">
-          <div class="trowCtn">
-            <div class="trow"
-              v-for="item in list"
-              :key="item.id">
-              <div class="tcolumn">
-                <el-checkbox v-model="item.checked"
-                  @change="$forceUpdate()">{{item.product_info.product_code}}</el-checkbox>
-              </div>
-              <div class="tcolumn"
-                :class="{'orange':item.type===1,'green':item.type===2}">{{item.type|filterType}}</div>
-              <div class="tcolumn">{{item.product_info.name}}</div>
-              <div class="tcolumn">{{item.sku.sku_code}}</div>
-              <div class="tcolumn overflow"
-                style="flex:1.5">{{getSkuName(item.sku.sku_info,item.product_info.category_info)}}</div>
-              <div class="tcolumn blue">{{item.number}}</div>
-              <div class="tcolumn">{{item.stock_name}}</div>
-              <div class="tcolumn">{{item.user_name}}</div>
-              <div class="tcolumn">{{item.create_time}}</div>
-              <div class="tcolumn flexRow">
-                <span class="opr red"
-                  @click="deleteLog(item.id)">删除</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <el-table :data="list"
+        style="width: 100%"
+        ref="multipleTable"
+        @selection-change="handleSelectionChange">
+        <el-table-column fixed
+          type="selection"
+          width="55">
+        </el-table-column>
+        <el-table-column fixed
+          label="产品编号"
+          width="150">
+          <template scope="item">
+            {{item.row.product_info.product_code}}
+          </template>
+        </el-table-column>
+        <el-table-column fixed
+          label="操作类型"
+          width="100">
+          <template scope="item">
+            <div class="tcolumn"
+              :class="{'orange':item.row.type===1,'green':item.row.type===2}">{{item.row.type|filterType}}</div>
+          </template>
+        </el-table-column>
+        <el-table-column label="产品名称"
+          width="150">
+          <template scope="item">
+            {{item.row.product_info.name}}
+          </template>
+        </el-table-column>
+        <el-table-column label="sku编码"
+          width="150">
+          <template scope="item">
+            {{item.row.sku.sku_code}}
+          </template>
+        </el-table-column>
+        <el-table-column label="规格"
+          width="180">
+          <template scope="item">
+            <div style="overflow:hidden;white-space:nowrap;text-overflow: ellipsis;">{{getSkuName(item.row.sku.sku_info,item.row.product_info.category_info)}}</div>
+          </template>
+        </el-table-column>
+        <el-table-column label="数量"
+          prop="number"
+          width="120">
+        </el-table-column>
+        <el-table-column label="单价(元)"
+          prop="price"
+          width="120">
+        </el-table-column>
+        <el-table-column label="来源仓库"
+          prop="stock_name"
+          width="120">
+        </el-table-column>
+        <el-table-column label="出库单位"
+          prop="client_name"
+          width="120">
+        </el-table-column>
+        <el-table-column label="操作人"
+          prop="user_name"
+          width="120">
+        </el-table-column>
+        <el-table-column label="创建日期"
+          prop="create_time"
+          width="120">
+        </el-table-column>
+        <el-table-column label="操作"
+          width="120"
+          fixed="right">
+          <template scope="item">
+            <span class="opr red"
+              @click="deleteLog(item.row.id)">删除</span>
+          </template>
+        </el-table-column>
+      </el-table>
     </div>
   </div>
 </template>
@@ -106,13 +159,32 @@ import { StoreInfo } from '@/types/store'
 export default Vue.extend({
   data(): {
     list: StoreInfo[]
+    selectList: StoreInfo[]
     [propName: string]: any
   } {
     return {
       loading: true,
+      search_type: 0,
+      search_type_list: [
+        {
+          value: 0,
+          name: '产品名称'
+        },
+        {
+          value: 1,
+          name: '产品编号'
+        },
+        {
+          value: 2,
+          name: 'sku编码'
+        }
+      ],
+      store_list: [],
+      store_id: '',
       keyword: '',
       type: 1,
       list: [],
+      selectList: [],
       date: [],
       chooseAll: false
     }
@@ -139,6 +211,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    handleSelectionChange(val: StoreInfo[]) {
+      this.selectList = val
+    },
     // 把非组合项找出来
     getUnCombine(categoryInfo: string): string[] {
       const categoryInfoArray = JSON.parse(categoryInfo)
@@ -182,11 +257,14 @@ export default Vue.extend({
     },
     getList() {
       this.loading = true
+      this.chooseAll = false
       store
         .skuLog({
-          stock_id: '',
+          stock_id: this.store_id,
           id: '',
-          sku_code: this.keyword,
+          product_code: this.search_type === 1 ? this.keyword : '',
+          sku_code: this.search_type === 2 ? this.keyword : '',
+          name: this.search_type === 0 ? this.keyword : '',
           type: this.type,
           start_time: this.date && this.date.length > 0 ? this.date[0] : '',
           end_time: this.date && this.date.length > 0 ? this.date[1] : ''
@@ -197,7 +275,7 @@ export default Vue.extend({
         })
     },
     reset() {
-      this.$router.push('/store/logList/page=1&&keyword=&&date=&&type=')
+      this.$router.push('/store/logList/page=1&&keyword=&&date=&&type=&&search_type=0&&store_id=')
     },
     changeRouter(page: number | string) {
       this.$router.push(
@@ -208,7 +286,11 @@ export default Vue.extend({
           '&&date=' +
           this.date +
           '&&type=' +
-          this.type
+          this.type +
+          '&&search_type=' +
+          this.search_type +
+          '&&store_id=' +
+          this.store_id
       )
     },
     deleteLog(id: number): void {
@@ -242,6 +324,8 @@ export default Vue.extend({
       this.page = Number(params.page)
       this.keyword = params.keyword
       this.type = (params.type && Number(params.type)) || 0
+      this.store_id = params.store_id && Number(params.store_id)
+      this.search_type = params.search_type && Number(params.search_type)
       if (params.date !== 'null' && params.date !== '') {
         this.date = params.date.split(',')
       } else {
@@ -249,25 +333,69 @@ export default Vue.extend({
       }
     },
     goPrint() {
-      if (this.type !== 1 || this.type !== 2) {
-        const arrIn = this.list.filter((item: StoreInfo) => item.checked && item.type === 1)
-        const arrOut = this.list.filter((item: StoreInfo) => item.checked && item.type === 2)
-        if (arrIn.length > 0 && arrOut.length > 0) {
-          this.$message.error('请选择一种操作类型单进行打印')
-          return
-        }
+      console.log(this.selectList)
+      const arrIn = this.selectList.filter((item: StoreInfo) => item.type === 1)
+      const arrOut = this.selectList.filter((item: StoreInfo) => item.type === 2)
+      if (arrIn.length > 0 && arrOut.length > 0) {
+        this.$message.error('请选择一种操作类型单进行打印')
+        return
       }
-      const idArr = this.list.filter((item) => item.checked).map((item) => item.id)
-      if (idArr.length > 0) {
-        window.open('/print/printStoreLog/' + idArr.join(',') + '/' + this.type)
+      if (this.selectList.length > 0) {
+        window.open(
+          '/print/printStoreLog/' +
+            this.selectList.map((item: StoreInfo) => item.id).join(',') +
+            '/' +
+            (arrIn.length > 0 ? '1' : '2')
+        )
       } else {
         this.$message.error('请至少选择一条日志进行打印')
       }
+    },
+    goExcel() {
+      if (this.selectList.length === 0) {
+        this.$message.error('请至少选择一条日志进行导出')
+        return
+      }
+      const data = this.selectList.map((item: StoreInfo) => {
+        return {
+          product_code: item.product_info?.product_code,
+          type: this.$options.filters!.filterType(item.type),
+          product_name: item.product_info?.name,
+          sku_code: item.sku?.sku_code,
+          size: this.getSkuName(item.sku?.sku_info as string, item.product_info?.category_info as string),
+          number: item.number,
+          price: item.price,
+          client_name: item.client_name,
+          stock_name: item.stock_name,
+          user_name: item.user_name,
+          create_time: item.create_time
+        }
+      })
+      this.$downloadExcel(
+        data,
+        [
+          { title: '产品编号', key: 'product_code' },
+          { title: '操作类型', key: 'type' },
+          { title: '产品名称', key: 'product_name' },
+          { title: 'sku编码', key: 'sku_code' },
+          { title: '规格', key: 'size' },
+          { title: '数量', key: 'number' },
+          { title: '单价', key: 'price' },
+          { title: '来源仓库', key: 'stock_name' },
+          { title: '出库单位', key: 'client_name' },
+          { title: '操作人', key: 'user_name' },
+          { title: '创建日期', key: 'create_time' }
+        ],
+        '围巾城出入库日志'
+      )
     }
   },
   mounted() {
     this.getFilters()
     this.getList()
+    store.list().then((res) => {
+      this.store_list = res.data.data
+    })
   }
 })
 </script>

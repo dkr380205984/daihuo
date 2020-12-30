@@ -44,6 +44,18 @@
             </div>
           </div>
           <div class="lineCtn">
+            <div class="label must">产品类型：</div>
+            <div class="line">
+              <div class="eldom"
+                style="line-height:32px">
+                <el-switch v-model="type"
+                  active-text="现货"
+                  inactive-text="期货">
+                </el-switch>
+              </div>
+            </div>
+          </div>
+          <div class="lineCtn">
             <div class="label must">来源单位：</div>
             <div class="line">
               <div class="eldom">
@@ -287,6 +299,7 @@ export default Vue.extend({
       file_arr: [],
       post_data: { token: '' },
       product_name: '',
+      type: '',
       product_type: '',
       type_list: [],
       product_brand: '',
@@ -529,6 +542,7 @@ export default Vue.extend({
       }
     },
     savePro() {
+      console.log(this.table_data.render_content)
       if (!this.formCheck()) {
         return
       }
@@ -536,15 +550,28 @@ export default Vue.extend({
       const price = '零售价'
       const costPrice = '成本价'
       const image = '图片'
+      const sku = 'sku编码'
+      let maxSku = 0
+      this.table_data.render_content.forEach((item) => {
+        if (item[sku] && Number(item[sku].substring(item[sku].length - 2, item[sku].length)) > maxSku) {
+          maxSku = Number(item[sku].substring(item[sku].length - 2, item[sku].length))
+        }
+      })
+      console.log(maxSku)
       const formData: ProductForm = {
         id: this.$route.params.id,
         name: this.product_name,
         category_id: this.product_type,
+        type: this.type ? '现货' : '期货',
         category_info: JSON.stringify(this.render_data), // 备份render_data，在修改页还可以用，不然要根据table_data反刍一个render_data出来，太恶心了
         sku_info: this.table_data.render_content.map(
           (item, index): SkuInfo => {
             return {
-              sku_id: index >= 9 ? index + 1 : '0' + (index + 1),
+              sku_id: item[sku]
+                ? item[sku].substring(item[sku].length - 2, item[sku].length)
+                : maxSku >= 9
+                ? (++maxSku).toString()
+                : '0' + ++maxSku,
               price: item[price],
               cost_price: item[costPrice],
               sku_info: JSON.stringify(item),
@@ -566,6 +593,7 @@ export default Vue.extend({
       product.save(formData).then((res: any) => {
         if (res.data.status) {
           this.$message.success('修改成功')
+          this.$router.push('/product/detail/' + res.data.data)
         }
       })
     },
@@ -617,35 +645,6 @@ export default Vue.extend({
       // return false 禁用自带的删除功能
       return false
     },
-    //  beforeRemove(file: any, fileList: any[]) {
-    //   console.log(file, fileList)
-    //   let deleteIndex2 = 0
-    //   let deleteIndex3 = 0
-    //   if (file.response) {
-    //     this.file_arr.forEach((item: string, index: number) => {
-    //       if (file.response.key === item) {
-    //         deleteIndex3 = index
-    //       }
-    //     })
-    //     this.file_arr.splice(deleteIndex3, 1)
-    //   } else {
-    //     this.product_image.forEach((item: any, index: number) => {
-    //       if (item.url === file.url) {
-    //         deleteIndex2 = index
-    //       }
-    //     })
-    //     this.product_image.splice(deleteIndex2, 1)
-    //   }
-    //   console.log(this.file_arr)
-    //   console.log(this.product_image)
-    //   this.$forceUpdate()
-    //   this.$message({
-    //     type: 'success',
-    //     message: '删除成功!'
-    //   })
-    //   // return false 禁用自带的删除功能
-    //   return false
-    // },
     filterName(name: string[] | string): string {
       if (typeof name === 'string') {
         return name
@@ -657,6 +656,7 @@ export default Vue.extend({
     getInfo(data: ProductForm) {
       this.product_name = data.name
       this.product_type = data.category_id
+      this.type = data.type === '现货' ? true : false
       this.product_image = data.images.map((item) => {
         return {
           id: item.id,

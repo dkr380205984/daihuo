@@ -20,7 +20,9 @@ const product = {
   save: (params: ProductSave) => http.post(`${baseUrl}/product/save`, params, 'application/json'),
   list: (params: ListParam) => http.get(`${baseUrl}/product/lists`, params),
   detail: (params: DetailParam) => http.get(`${baseUrl}/product/detail`, params),
-  delete: (params: DeleteParam) => http.post(`${baseUrl}/product/delete`, params, 'application/json')
+  delete: (params: DeleteParam) => http.post(`${baseUrl}/product/delete`, params, 'application/json'),
+  recommendPro: (params: DeleteParam) => http.post(`${baseUrl}/product/recommend`, params, 'application/json'),
+  recommand: () => http.get(`${baseUrl}/index/recommend`) // 首页产品推荐
 }
 
 // 订单
@@ -55,9 +57,42 @@ import { UserInfo } from '@/types/setting'
 const user = {
   save: (params: UserInfo) => http.post(`${baseUrl}/user/save`, params, 'application/json'),
   list: (params?: ListParam) => http.get(`${baseUrl}/user/lists`, params),
-  ban: (params: DeleteParam) => http.post(`${baseUrl}/user/check/status`, params, 'application/json')
+  ban: (params: DeleteParam) => http.post(`${baseUrl}/user/check/status`, params, 'application/json'),
+  detail: () => http.get(`${baseUrl}/user/info`)
+}
+
+// 统计
+const statistics = {
+  stockNumber: () => http.get(`${baseUrl}/index/order/total`), // 首页库存数据统计
+  orderNumber: () => http.get(`${baseUrl}/index/order/number`), // 首页订单数据统计
+  dispatchSts: (params: ListParam) => http.get(`${baseUrl}/order/dispatch/lists`, params) //订单发货统计
+}
+
+// 搜索
+const serach = {
+  mainSearch: (params: { keyword: string }) => http.get(`${baseUrl}/index/search`, params)
+}
+
+// 通知
+import { NotifyInfo } from '@/types/notify'
+const notify = {
+  send: (params: NotifyInfo) => http.post(`${baseUrl}/notify/save`, params, 'application/json'),
+  list: (params: ListParam) => http.get(`${baseUrl}/notify/lists`, params),
+  read: (params: DetailParam) => http.post(`${baseUrl}/notify/read`, params, 'application/json')
+}
+
+// 运营商
+import { ServiceInfo } from '@/types/setting'
+const service = {
+  save: (params: ServiceInfo) => http.post(`${baseUrl}/edit/operator/save`, params, 'application/json'),
+  list: (params: ListParam) => http.get(`${baseUrl}/edit/operator/lists`, params),
+  ban: (params: DeleteParam) => http.post(`${baseUrl}//edit/operator/status/check`, params, 'application/json')
 }
 export {
+  service,
+  notify,
+  serach,
+  statistics,
   user,
   client,
   store,

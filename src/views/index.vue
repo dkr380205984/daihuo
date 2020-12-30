@@ -7,15 +7,15 @@
           <div class="icon">
             <img src="../assets/image/noPic.jpg" />
           </div>
-          <div class="sampleName">简写短一点</div>
-          <div class="allName">全程长一点长一点</div>
+          <div class="sampleName">围巾城</div>
+          <div class="allName">中国围巾城</div>
         </div>
         <div class="navCtn">
           <div class="nav"
             v-for="(item,index) in navList"
             :key="index"
-            :class="{'active':item.active}"
-            @click="$router.push(item.url)">
+            :class="{'active':$route.name===item.name}"
+            @click="goRouter(item)">
             <div class="icon">
               <img :src="item.icon || require('@/assets/image/noPic.jpg')" />
             </div>
@@ -44,16 +44,98 @@ interface NavInfo {
 export default Vue.extend({
   data(): { navList: NavInfo[]; [propName: string]: any } {
     return {
+      actived: '首页',
       navList: [
-        // { name: '首页', url: '/index', active: true },
-        { name: '产品管理', url: '/product/list/page=1&&keyword=&&date=&&client_id=' },
-        { name: '库存管理', url: '/store/list/page=1&&keyword=&&date=&&client_id=' },
-        { name: '出入库日志', url: '/store/logList/page=1&&keyword=&&date=&&type=' },
-        { name: '订单管理', url: '/order/list/page=1&&keyword=&&date=' },
-        // { name: '个人中心', url: '/index' },
-        { name: '品类设置', url: '/setting/category/page=1&&keyword=' },
-        { name: '系统设置', url: '/setting/main/page=1&&keyword=' }
+        { name: '首页', url: '/index/main', icon: require('@/assets/image/index/首页.png') },
+        {
+          name: '产品管理',
+          url: '/product/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0&&types=null',
+          icon: require('@/assets/image/index/产品管理.png')
+        },
+        {
+          name: '库存管理',
+          url: '/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0',
+          icon: require('@/assets/image/index/库存管理.png')
+        },
+        {
+          name: '出入库日志',
+          url: '/store/logList/page=1&&keyword=&&date=&&type=&&search_type=0&&store_id=',
+          icon: require('@/assets/image/index/出入库日志.png')
+        },
+        {
+          name: '订单管理',
+          url: '/order/list/page=1&&keyword=&&date=&&type=0',
+          icon: require('@/assets/image/index/订单管理.png')
+        },
+        {
+          name: '品类设置',
+          url: '/setting/category/page=1&&keyword=',
+          icon: require('@/assets/image/index/品类设置.png')
+        },
+        {
+          name: '系统设置',
+          url: '/setting/main/page=1&&keyword=&&type=user',
+          icon: require('@/assets/image/index/系统设置.png')
+        },
+        { name: '发布公告', url: '/setting/sendMsg', icon: require('@/assets/image/index/发布公告.png') }
       ]
+    }
+  },
+  methods: {
+    goRouter(item: NavInfo) {
+      this.$router.push(item.url)
+    }
+  },
+  mounted() {
+    if (JSON.parse(window.localStorage.getItem('userInfo') as string).type !== 1) {
+      this.navList = [
+        { name: '首页', url: '/index/main', icon: require('@/assets/image/index/首页.png') },
+        {
+          name: '产品管理',
+          url: '/product/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0&&types=null',
+          icon: require('@/assets/image/index/产品管理.png')
+        },
+        {
+          name: '库存管理',
+          url: '/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0',
+          icon: require('@/assets/image/index/库存管理.png')
+        },
+        {
+          name: '出入库日志',
+          url: '/store/logList/page=1&&keyword=&&date=&&type=&&search_type=0&&store_id=',
+          icon: require('@/assets/image/index/出入库日志.png')
+        },
+        {
+          name: '订单管理',
+          url: '/order/list/page=1&&keyword=&&date=&&type=0',
+          icon: require('@/assets/image/index/订单管理.png')
+        },
+        {
+          name: '品类设置',
+          url: '/setting/category/page=1&&keyword=',
+          icon: require('@/assets/image/index/品类设置.png')
+        },
+        {
+          name: '系统设置',
+          url: '/setting/main/page=1&&keyword=&&type=user',
+          icon: require('@/assets/image/index/系统设置.png')
+        }
+      ]
+      if (JSON.parse(window.localStorage.getItem('userInfo') as string).type === 3) {
+        this.navList = [
+          { name: '首页', url: '/index/main', icon: require('@/assets/image/index/首页.png') },
+          {
+            name: '产品管理',
+            url: '/product/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0&&types=null',
+            icon: require('@/assets/image/index/产品管理.png')
+          },
+          {
+            name: '订单管理',
+            url: '/order/list/page=1&&keyword=&&date=&&type=0',
+            icon: require('@/assets/image/index/订单管理.png')
+          }
+        ]
+      }
     }
   }
 })
