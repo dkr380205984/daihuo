@@ -541,8 +541,48 @@ export default Vue.extend({
         return true
       }
     },
+    // 把非组合项找出来
+    getUnCombine(categoryInfo: string): string[] {
+      const categoryInfoArray = JSON.parse(categoryInfo)
+      const returnObj = [] as string[]
+      categoryInfoArray.forEach((item: any) => {
+        if (!item.is_combine) {
+          if (!item.keyArr) {
+            returnObj.push(item.name)
+          } else {
+            if (item.keyArr instanceof Array) {
+              returnObj.push(item.keyArr.join(','))
+            } else {
+              returnObj.push(Object.keys(item.keyArr).join(','))
+            }
+          }
+        }
+      })
+      return returnObj
+    },
+    getSkuName(skuInfo: string, categoryInfo: string): string[] {
+      const returnArr = [] as string[]
+      const skuInfoSelf = JSON.parse(skuInfo)
+      const deleteObj = this.getUnCombine(categoryInfo)
+      const price = '成本价'
+      const costPrice = '零售价'
+      const storeNum = '库存数'
+      const image = '图片'
+      const sku = 'sku编码'
+      delete skuInfoSelf[costPrice]
+      delete skuInfoSelf[price]
+      delete skuInfoSelf[storeNum]
+      delete skuInfoSelf[image]
+      delete skuInfoSelf[sku]
+      deleteObj.forEach((item: string) => {
+        delete skuInfoSelf[item]
+      })
+      Object.keys(skuInfoSelf).forEach((key) => {
+        returnArr.push(key + ':' + skuInfoSelf[key])
+      })
+      return returnArr
+    },
     savePro() {
-      console.log(this.table_data.render_content)
       if (!this.formCheck()) {
         return
       }
@@ -557,7 +597,6 @@ export default Vue.extend({
           maxSku = Number(item[sku].substring(item[sku].length - 2, item[sku].length))
         }
       })
-      console.log(maxSku)
       const formData: ProductForm = {
         id: this.$route.params.id,
         name: this.product_name,
@@ -575,7 +614,8 @@ export default Vue.extend({
               price: item[price],
               cost_price: item[costPrice],
               sku_info: JSON.stringify(item),
-              image_url: item[image]
+              image_url: item[image],
+              pda_sku_info: this.getSkuName(JSON.stringify(item), JSON.stringify(this.render_data)).join('\n')
             }
           }
         ),

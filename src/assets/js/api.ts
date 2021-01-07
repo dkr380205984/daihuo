@@ -65,7 +65,7 @@ const user = {
 const statistics = {
   stockNumber: () => http.get(`${baseUrl}/index/order/total`), // 首页库存数据统计
   orderNumber: () => http.get(`${baseUrl}/index/order/number`), // 首页订单数据统计
-  dispatchSts: (params: ListParam) => http.get(`${baseUrl}/order/dispatch/lists`, params) //订单发货统计
+  dispatchSts: (params: ListParam) => http.get(`${baseUrl}/order/dispatch/lists`, params) // 订单发货统计
 }
 
 // 搜索
