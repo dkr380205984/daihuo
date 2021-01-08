@@ -472,6 +472,7 @@ export default Vue.extend({
         }, 0)
     },
     getLog(id: number): void {
+      this.loading = true
       store
         .skuLog({
           stock_id: '',
@@ -479,10 +480,11 @@ export default Vue.extend({
           sku_code: ''
         })
         .then((res) => {
-          this.log_list = res.data.data.items
+          this.log_list = res.data.data
           if (this.log_list.length > 0) {
             this.stsLog()
             this.log_flag = true
+            this.loading = false
           } else {
             this.$message.warning('该产品暂无相关的出入库日志')
           }

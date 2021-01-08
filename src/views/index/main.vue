@@ -155,7 +155,7 @@
           <div class="codeCtn">
             <div class="code">
               <img style="width:100%;height:100%"
-                :src="require('@/assets/image/index/小程序.jpg') " />
+                src="https://zhihui.tlkrzf.com/1610079833000.jpg" />
             </div>
             <div class="text">扫一扫使用微信小程序</div>
           </div>
@@ -345,6 +345,11 @@ export default Vue.extend({
         border-color: transparent !important;
       }
     }
+  }
+  .el-image__inner {
+    width: auto;
+    max-width: 100%;
+    height: 120px;
   }
 }
 </style>
