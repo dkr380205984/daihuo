@@ -7,8 +7,8 @@
           <div class="icon">
             <img src="../assets/image/index/图标.jpg" />
           </div>
-          <div class="sampleName">围巾城</div>
-          <div class="allName">中国围巾城</div>
+          <div class="sampleName">中国围巾城</div>
+          <div class="allName">China Scarf City</div>
         </div>
         <div class="navCtn">
           <div class="nav"

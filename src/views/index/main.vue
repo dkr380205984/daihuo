@@ -155,7 +155,7 @@
           <div class="codeCtn">
             <div class="code">
               <img style="width:100%;height:100%"
-                src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=151212591,3558744659&fm=26&gp=0.jpg" />
+                :src="require('@/assets/image/index/小程序.jpg') " />
             </div>
             <div class="text">扫一扫使用微信小程序</div>
           </div>
