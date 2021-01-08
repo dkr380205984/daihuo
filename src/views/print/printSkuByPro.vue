@@ -99,9 +99,7 @@ export default Vue.extend({
     product.detail({ id: this.$route.params.proId }).then((res) => {
       if (res.data.status) {
         this.product_name = res.data.data.name
-        const finded = res.data.data.sku_info.find(
-          (item: SkuInfo) => Number(item.sku_id) === Number(this.$route.params.id)
-        )
+        const finded = res.data.data.sku_info.find((item: SkuInfo) => Number(item.id) === Number(this.$route.params.id))
         this.sku_code = finded.sku_code
         this.sku_info = this.getSkuName(finded.sku_info, res.data.data.category_info)
         console.log(this.$route.params.number)

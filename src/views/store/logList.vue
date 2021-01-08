@@ -23,9 +23,10 @@
             :label="item.name"></el-option>
         </el-select>
       </div>
-      <div class="elCtn">
+      <div class="elCtn"
+        style="width:150px">
         <el-input v-model="keyword"
-          placeholder="输入信息按回车搜索"
+          placeholder="按回车搜索"
           @change="changeRouter(1)"></el-input>
       </div>
       <div class="elCtn"
@@ -43,6 +44,19 @@
       </div>
       <div class="elCtn"
         style="width:150px">
+        <el-select v-model="source"
+          placeholder="操作类型"
+          @change="changeRouter(1)">
+          <el-option value="0"
+            label="全部"></el-option>
+          <el-option value="PDA"
+            label="PDA"></el-option>
+          <el-option value="电脑后台"
+            label="电脑后台"></el-option>
+        </el-select>
+      </div>
+      <div class="elCtn"
+        style="width:150px">
         <el-select v-model="store_id"
           placeholder="筛选仓库"
           clearable
@@ -54,9 +68,9 @@
         </el-select>
       </div>
       <div class="elCtn"
-        style="width:290px">
+        style="width:240px">
         <el-date-picker @change="changeRouter(1)"
-          style="width:290px"
+          style="width:240px"
           v-model="date"
           class="filter_item"
           type="daterange"
@@ -91,10 +105,10 @@
         </el-table-column>
         <el-table-column fixed
           label="操作类型"
-          width="100">
+          width="120">
           <template scope="item">
             <div class="tcolumn"
-              :class="{'orange':item.row.type===1,'green':item.row.type===2}">{{item.row.type|filterType}}</div>
+              :class="{'orange':item.row.type===1,'green':item.row.type===2}">{{item.row.type|filterType}}/{{item.row.data_source}}</div>
           </template>
         </el-table-column>
         <el-table-column label="产品名称"
@@ -165,6 +179,7 @@ export default Vue.extend({
     return {
       loading: true,
       search_type: 0,
+      source: '0',
       search_type_list: [
         {
           value: 0,
@@ -260,8 +275,11 @@ export default Vue.extend({
       this.chooseAll = false
       store
         .skuLog({
+          page: 1,
+          limit: 999,
           stock_id: this.store_id,
           id: '',
+          data_source: this.source,
           product_code: this.search_type === 1 ? this.keyword : '',
           sku_code: this.search_type === 2 ? this.keyword : '',
           name: this.search_type === 0 ? this.keyword : '',
@@ -275,7 +293,7 @@ export default Vue.extend({
         })
     },
     reset() {
-      this.$router.push('/store/logList/page=1&&keyword=&&date=&&type=&&search_type=0&&store_id=')
+      this.$router.push('/store/logList/page=1&&keyword=&&date=&&type=&&search_type=0&&store_id=&&data_source=0')
     },
     changeRouter(page: number | string) {
       this.$router.push(
@@ -290,7 +308,9 @@ export default Vue.extend({
           '&&search_type=' +
           this.search_type +
           '&&store_id=' +
-          this.store_id
+          this.store_id +
+          '&&data_source=' +
+          this.source
       )
     },
     deleteLog(id: number): void {
@@ -326,6 +346,7 @@ export default Vue.extend({
       this.type = (params.type && Number(params.type)) || 0
       this.store_id = params.store_id && Number(params.store_id)
       this.search_type = params.search_type && Number(params.search_type)
+      this.source = params.data_source
       if (params.date !== 'null' && params.date !== '') {
         this.date = params.date.split(',')
       } else {

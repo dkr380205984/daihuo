@@ -446,7 +446,7 @@ export default Vue.extend({
       })
         .then((obj: any) => {
           if (obj.value) {
-            window.open('/print/printSkuByPro/' + sku.sku_id + '/' + obj.value + '/' + this.$route.params.id)
+            window.open('/print/printSkuByPro/' + sku.id + '/' + obj.value + '/' + this.$route.params.id)
           } else {
             this.$message.error('请输入打印张数')
           }

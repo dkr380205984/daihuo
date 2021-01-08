@@ -5,7 +5,7 @@
       <div class="navMain">
         <div class="clientInfo">
           <div class="icon">
-            <img src="../assets/image/noPic.jpg" />
+            <img src="../assets/image/index/图标.jpg" />
           </div>
           <div class="sampleName">围巾城</div>
           <div class="allName">中国围巾城</div>
@@ -59,7 +59,7 @@ export default Vue.extend({
         },
         {
           name: '出入库日志',
-          url: '/store/logList/page=1&&keyword=&&date=&&type=&&search_type=0&&store_id=',
+          url: '/store/logList/page=1&&keyword=&&date=&&type=&&search_type=0&&store_id=&&data_source=0',
           icon: require('@/assets/image/index/出入库日志.png')
         },
         {
