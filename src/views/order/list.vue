@@ -8,7 +8,7 @@
         <div class="btn btnGreen"
           @click="getStsList">订单发货统计</div>
         <div class="btn btnOrange"
-          @click="print_flag = true">打印供货单</div>
+          @click="getOrderClient">打印供货单</div>
         <div class="btn btnBlue"
           @click="importOrder">导入订单</div>
       </div>
@@ -226,8 +226,8 @@
           <div style="margin:24px 0">
             <el-radio-group v-model="client_id">
               <el-radio v-for="item in client_list"
-                :key="item.id"
-                :label="item.id">{{item.name}}</el-radio>
+                :key="item.client_id"
+                :label="item.client_name">{{item.client_name}}</el-radio>
             </el-radio-group>
           </div>
         </div>
@@ -678,17 +678,29 @@ export default Vue.extend({
       return returnArr
     },
     getStsList(): void {
-      console.log(this.sts_date)
+      this.loading = true
       statistics
         .dispatchSts({
           start_time: this.sts_date && this.sts_date.length > 0 ? this.sts_date[0] : '',
           end_time: this.sts_date && this.sts_date.length > 0 ? this.sts_date[1] : ''
         })
         .then((res) => {
-          console.log(res)
-          this.sts_list = this.filterSts(res.data.data)
-          console.log(this.sts_list)
+          this.sts_list = this.filterSts(res.data.data.order_data)
           this.sts_flag = true
+          this.loading = false
+        })
+    },
+    getOrderClient() {
+      this.loading = true
+      statistics
+        .dispatchSts({
+          start_time: this.sts_date && this.sts_date.length > 0 ? this.sts_date[0] : '',
+          end_time: this.sts_date && this.sts_date.length > 0 ? this.sts_date[1] : ''
+        })
+        .then((res) => {
+          this.client_list = res.data.data.client_data
+          this.print_flag = true
+          this.loading = false
         })
     },
     goExcel() {

@@ -88,8 +88,10 @@
         <div class="thead">
           <div class="trowCtn">
             <div class="trow">
-              <div class="tcolumn">产品编号</div>
-              <div class="tcolumn">产品名称</div>
+              <div class="tcolumn"
+                style="flex:1.3">产品编号</div>
+              <div class="tcolumn"
+                style="flex:1.2">产品名称</div>
               <div class="tcolumn"
                 style="text-align:center">产品图片</div>
               <div class="tcolumn">供货单位</div>
@@ -107,7 +109,7 @@
             :key="item.id">
             <div class="trow">
               <div class="tcolumn flexRow"
-                style="justify-content:space-between">
+                style="justify-content:space-between;flex:1.3">
                 <span>
                   <span class="circle"
                     :class="{'green':item.type==='现货','orange':item.type==='期货'}">{{item.type==='现货'?'现':'期'}}</span>
@@ -130,7 +132,8 @@
                     @click="recommendPro(item.id)"></i>
                 </el-tooltip>
               </div>
-              <div class="tcolumn">{{item.name}}</div>
+              <div class="tcolumn"
+                style="flex:1.2">{{item.name}}</div>
               <div class="tcolumn">
                 <zh-img-list :list="item.images"></zh-img-list>
               </div>

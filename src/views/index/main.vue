@@ -12,7 +12,7 @@
           <div class="nameCtn">
             <div class="line">欢迎！{{user_info.name}}</div>
             <div class="line"
-              style="color:rgba(0,0,0,0.45);font-size:14px">{{user_info.type===1?'平台账号':user_info.type===2?'运营商':'主播'}}</div>
+              style="color:rgba(0,0,0,0.45);font-size:14px">{{user_info.type===1?'平台账号':user_info.type===2?'运营商':user_info.type===3?'主播':'工厂人员'}}</div>
           </div>
         </div>
         <div class="right">

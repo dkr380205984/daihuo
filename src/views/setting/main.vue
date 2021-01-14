@@ -48,7 +48,7 @@
                         <div class="tcolumn">{{item.user_name}}</div>
                         <div class="tcolumn">{{item.phone}}</div>
                         <div class="tcolumn">{{item.name}}</div>
-                        <div class="tcolumn">{{item.type===1?'平台人员':item.type===2?'运营商':'主播'}}</div>
+                        <div class="tcolumn">{{item.type===1?'平台人员':item.type===2?'运营商':item.type===3?'主播':'工厂人员'}}</div>
                         <div class="tcolumn"
                           :class="{'green':item.status===1,'red':item.status!==1}">{{item.status===1?'已启用':'已禁用'}}</div>
                         <div class="tcolumn">{{item.created_at?item.created_at.substring(0,10):''}}</div>
@@ -853,6 +853,10 @@ export default Vue.extend({
         {
           value: 2,
           label: '运营'
+        },
+        {
+          value: 4,
+          label: '工厂人员'
         }
       ]
     } else if (userInfo.type === 2) {
