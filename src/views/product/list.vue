@@ -41,7 +41,8 @@
         </el-select>
       </div>
       <div class="elCtn"
-        style="width:120px">
+        style="width:120px"
+        v-if="show_client">
         <el-select v-model="client_id"
           placeholder="供货单位"
           @change="changeRouter(1)"
@@ -176,6 +177,7 @@ export default Vue.extend({
     return {
       loading: true,
       search_type: 0,
+      show_client: true,
       search_type_list: [
         {
           value: 0,
@@ -315,6 +317,9 @@ export default Vue.extend({
       this.client_list = res[0].data.data
       this.user_list = res[1].data.data
     })
+    if (JSON.parse(window.localStorage.getItem('userInfo') as string).type === 4) {
+      this.show_client = false
+    }
   }
 })
 </script>

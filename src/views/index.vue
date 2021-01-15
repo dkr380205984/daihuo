@@ -138,10 +138,12 @@ export default Vue.extend({
       }
       if (JSON.parse(window.localStorage.getItem('userInfo') as string).type === 4) {
         this.navList = [
-          { name: '首页', url: '/index/main', icon: require('@/assets/image/index/首页.png') },
           {
             name: '产品管理',
-            url: '/product/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0&&types=null',
+            url:
+              '/product/list/page=1&&keyword=&&date=&&client_id=' +
+              JSON.parse(window.localStorage.getItem('userInfo') as string).client_id +
+              '&&user_id=&&type=0&&types=null',
             icon: require('@/assets/image/index/产品管理.png')
           }
         ]

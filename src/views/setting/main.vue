@@ -278,6 +278,21 @@
               </el-select>
             </div>
           </div>
+          <div class="editCtn"
+            v-if="user_info.type===4">
+            <div class="label">所属工厂
+              <span class="explanation">(必选)</span>
+            </div>
+            <div class="inputCtn">
+              <el-select v-model="user_info.client_id"
+                placeholder="请选择所属工厂">
+                <el-option v-for="item in client_list"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"></el-option>
+              </el-select>
+            </div>
+          </div>
           <div class="editCtn">
             <div class="label">备注信息
             </div>
@@ -488,7 +503,8 @@ export default Vue.extend({
         phone: '',
         name: '',
         desc: '',
-        type: ''
+        type: '',
+        client_id: ''
       },
       user_type: 1,
       user_list: [],
@@ -872,6 +888,9 @@ export default Vue.extend({
       ]
     }
     this.user_type = userInfo.type
+    client.list().then((res) => {
+      this.client_list = res.data.data
+    })
   }
 })
 </script>

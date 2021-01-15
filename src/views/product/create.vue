@@ -42,7 +42,8 @@
               </div>
             </div>
           </div>
-          <div class="lineCtn">
+          <div class="lineCtn"
+            v-if="userType!==4">
             <div class="label must">来源单位：</div>
             <div class="line">
               <div class="eldom">
@@ -288,6 +289,7 @@ export default Vue.extend({
     [propName: string]: any
   } {
     return {
+      userType: JSON.parse(window.localStorage.getItem('userInfo') as string).type,
       file_arr: [],
       post_data: { token: '' },
       product_name: '',
@@ -495,7 +497,7 @@ export default Vue.extend({
         msg = '请输入产品名称'
       } else if (!this.product_type) {
         msg = '请选择产品品类'
-      } else if (!this.from_client) {
+      } else if (JSON.parse(window.localStorage.getItem('userInfo') as string).type !== 4 && !this.from_client) {
         msg = '请选择来源单位'
       } else {
         this.render_data.forEach((item: any) => {
@@ -616,7 +618,10 @@ export default Vue.extend({
         max_price: this.$clone(this.table_data.render_content).sort(
           (a: any, b: any): any => Number(b[price]) - Number(a[price])
         )[0][price],
-        client_id: this.from_client || 1,
+        client_id:
+          JSON.parse(window.localStorage.getItem('userInfo') as string).type === 4
+            ? JSON.parse(window.localStorage.getItem('userInfo') as string).client_id
+            : this.from_client,
         brand_id: this.product_brand || 1,
         images: this.file_arr,
         description: this.desc

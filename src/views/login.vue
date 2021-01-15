@@ -92,7 +92,15 @@ export default Vue.extend({
           user.detail().then((resChild) => {
             window.localStorage.setItem('userInfo', JSON.stringify(resChild.data.data))
             this.$message.success('登录成功')
-            this.$router.push('/index/main')
+            if (resChild.data.data.type === 4) {
+              this.$router.push(
+                '/product/list/page=1&&keyword=&&date=&&client_id=' +
+                  resChild.data.data.client_id +
+                  '&&user_id=&&type=0&&types=null'
+              )
+            } else {
+              this.$router.push('/index/main')
+            }
           })
         } else {
           this.$message.error({
