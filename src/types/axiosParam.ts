@@ -9,5 +9,6 @@ export interface DetailParam {
 }
 
 export interface DeleteParam {
-  id: number | string
+  id?: number | string
+  [propName: string]: any
 }

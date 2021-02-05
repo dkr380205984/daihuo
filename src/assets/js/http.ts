@@ -25,7 +25,7 @@ axios.interceptors.response.use(
     if (res.data.code === 200) {
       // do nothing
     } else if (res.data.code === 403) {
-      Message.Message.error(res.data.message)
+      Message.Message.error(res.data.msg)
     } else if (res.data.code === 500) {
       Message.Message.error('服务器异常')
     } else if (res.data.code === 404) {

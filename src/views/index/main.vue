@@ -313,13 +313,16 @@ export default Vue.extend({
       this.recommand_list = res[0].data.data
       this.msg_list = res[2].data.data.items
       console.log(window.localStorage.getItem('msgList'))
-      if (window.localStorage.getItem('msgList')) {
-        if (JSON.parse(window.localStorage.getItem('msgList') as string).indexOf(this.msg_list[0].id) === -1) {
+      if (this.msg_list.length > 0) {
+        if (window.localStorage.getItem('msgList')) {
+          if (JSON.parse(window.localStorage.getItem('msgList') as string).indexOf(this.msg_list[0].id) === -1) {
+            this.lookDetail(this.msg_list[0])
+          }
+        } else {
           this.lookDetail(this.msg_list[0])
         }
-      } else {
-        this.lookDetail(this.msg_list[0])
       }
+
       this.stock_sts = res[3].data.data
       this.loading = false
     })

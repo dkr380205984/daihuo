@@ -131,12 +131,11 @@
           </div>
         </div>
         <div class="contentCtn">
-          <div class="lineCtn"
+          <!-- <div class="lineCtn"
             v-for="(item,index) in render_data"
             :key="index">
             <div class="label"
               :class="{'must':item.is_required}">{{item.name}}：</div>
-            <!-- 组合项 -->
             <template v-if="item.is_combine">
               <div v-for="(itemOnce,indexOnce) in item.inputValue"
                 :key="indexOnce">
@@ -185,7 +184,6 @@
                 </div>
               </div>
             </template>
-            <!-- 非组合项 -->
             <template v-else>
               <div class="line oneLine"
                 v-if="item.category_menu.length>0">
@@ -211,7 +209,7 @@
                 </div>
               </div>
             </template>
-          </div>
+          </div> -->
           <div class="lineCtn">
             <div class="label must">表格信息：</div>
             <div class="line">
@@ -222,7 +220,14 @@
                       <div class="trow">
                         <div class="tcolumn min120"
                           v-for="(item,index) in table_data.header"
-                          :key="index">{{filterName(item.name)}}</div>
+                          :key="index">
+                          <div>{{filterName(item.name)}}
+                            <span v-if="filterName(item.name)==='sku编码'"
+                              class="blue"
+                              style="cursor:pointer"
+                              @click="addData">新增规格</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div class="tbody">
@@ -232,10 +237,16 @@
                         <div class="tcolumn min120"
                           v-for="(item,index) in table_data.header"
                           :key="index">
-                          <span v-if="item.firstName"
-                            :style="{'color':item.is_required &&!itemRow[filterName(item.name)]?'#F5222D':''}">{{itemRow[filterName(item.name)] || (item.is_required ?'未填必填项':'非必填')}}</span>
+                          <!-- 只有sku编码不能改 -->
+                          <span v-if="item.name === 'sku编码'"
+                            :style="{'color':item.is_required &&!itemRow[filterName(item.name)]?'#F5222D':''}">
+                            {{itemRow[filterName(item.name)]||'新增项'}}
+                            (<span class="red"
+                              style="cursor:pointer"
+                              @click="deleteSku(itemRow[filterName(item.name)],indexRow)">删除</span>)
+                          </span>
                           <el-input class="elDom"
-                            v-if="!item.firstName && item.name!=='图片'"
+                            v-if="item.name!=='图片'&&item.name !== 'sku编码'"
                             v-model="itemRow[filterName(item.name)]"
                             @input="$forceUpdate()"
                             :placeholder="item.name">
@@ -318,10 +329,18 @@ export default Vue.extend({
         mix_content: [], // 存放组合项
         render_content: [], // 需要渲染的表格,实时计算
         old_render_content: [] // 保留一份原始数据用于匹配价格，库存，sku信息
-      }
+      },
+      sku_id_arr: []
     }
   },
   methods: {
+    addData() {
+      const obj = {} as any
+      this.table_data.header.forEach((item: any) => {
+        obj[this.filterName(item.name) as string] = ''
+      })
+      this.table_data.render_content.push(obj)
+    },
     renderTable(first?: boolean): void {
       if (first === true) {
         // 第一步,把表格标题找出来,并确定组合项,必填项
@@ -608,6 +627,7 @@ export default Vue.extend({
         sku_info: this.table_data.render_content.map(
           (item, index): SkuInfo => {
             return {
+              id: item[sku] ? this.sku_id_arr.find((itemFind: any) => itemFind.code === item[sku]).id : '',
               sku_id: item[sku]
                 ? item[sku].substring(item[sku].length - 2, item[sku].length)
                 : maxSku >= 9
@@ -631,7 +651,7 @@ export default Vue.extend({
           JSON.parse(window.localStorage.getItem('userInfo') as string).type === 4
             ? JSON.parse(window.localStorage.getItem('userInfo') as string).client_id
             : this.from_client,
-        brand_id: this.product_brand || 1,
+        brand_id: this.product_brand,
         images: this.product_image.map((item: any) => item.url),
         description: this.desc
       }
@@ -701,6 +721,7 @@ export default Vue.extend({
     getInfo(data: ProductForm) {
       this.product_name = data.name
       this.product_type = data.category_id
+      this.product_brand = data.brand_id
       this.type = data.type === '现货' ? true : false
       this.product_image = data.images.map((item) => {
         return {
@@ -716,6 +737,12 @@ export default Vue.extend({
         obj[skuCode] = item.sku_code
         return obj
       })
+      this.sku_id_arr = data.sku_info.map((item) => {
+        return {
+          id: item.id,
+          code: item.sku_code
+        }
+      })
       this.table_data.old_render_content = this.$clone(this.table_data.render_content)
     },
     querySearch(str: string, cb: (data: any) => void, commonUse: string[]): void {
@@ -730,6 +757,37 @@ export default Vue.extend({
       return (data: any) => {
         return data.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0
       }
+    },
+    deleteSku(code: string, index: number) {
+      this.$confirm('是否删除该规格?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          if (code) {
+            this.loading = true
+            product
+              .deleteSku({
+                sku_id: this.sku_id_arr.find((item: any) => item.code === code).id
+              })
+              .then((res) => {
+                this.loading = false
+                if (res.data.status) {
+                  this.$message.success('删除成功')
+                  this.table_data.render_content.splice(index, 1)
+                }
+              })
+          } else {
+            this.table_data.render_content.splice(index, 1)
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     }
   },
   mounted() {

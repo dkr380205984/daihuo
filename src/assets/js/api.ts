@@ -20,6 +20,7 @@ const product = {
   save: (params: ProductSave) => http.post(`${baseUrl}/product/save`, params, 'application/json'),
   list: (params: ListParam) => http.get(`${baseUrl}/product/lists`, params),
   detail: (params: DetailParam) => http.get(`${baseUrl}/product/detail`, params),
+  deleteSku: (params: DeleteParam) => http.post(`${baseUrl}/product/sku/delete`, params, 'application/json'),
   delete: (params: DeleteParam) => http.post(`${baseUrl}/product/delete`, params, 'application/json'),
   recommendPro: (params: DeleteParam) => http.post(`${baseUrl}/product/recommend`, params, 'application/json'),
   recommand: () => http.get(`${baseUrl}/index/recommend`) // 首页产品推荐

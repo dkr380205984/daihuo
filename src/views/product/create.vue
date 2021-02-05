@@ -603,6 +603,7 @@ export default Vue.extend({
         sku_info: this.table_data.render_content.map(
           (item, index): SkuInfo => {
             return {
+              id: '',
               sku_id: index >= 9 ? index + 1 : '0' + (index + 1),
               price: item[price],
               cost_price: item[costPrice],
@@ -622,7 +623,7 @@ export default Vue.extend({
           JSON.parse(window.localStorage.getItem('userInfo') as string).type === 4
             ? JSON.parse(window.localStorage.getItem('userInfo') as string).client_id
             : this.from_client,
-        brand_id: this.product_brand || 1,
+        brand_id: this.product_brand,
         images: this.file_arr,
         description: this.desc
       }

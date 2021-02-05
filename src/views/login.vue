@@ -103,9 +103,6 @@ export default Vue.extend({
             }
           })
         } else {
-          this.$message.error({
-            message: res.data.message
-          })
           this.password = ''
         }
       })

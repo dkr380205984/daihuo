@@ -519,7 +519,7 @@ export default Vue.extend({
         .then((res) => {
           this.loading = false
           if (type === 1) {
-            this.log_list = res.data.data.items
+            this.log_list = res.data.data
             if (this.log_list.length > 0) {
               this.stsLog()
               this.log_flag = true
