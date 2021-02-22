@@ -100,7 +100,7 @@
           label="产品编号"
           width="150">
           <template scope="item">
-            {{item.row.product_info.product_code}}
+            {{item.row.product_info?item.row.product_info.product_code:'获取产品失败'}}
           </template>
         </el-table-column>
         <el-table-column fixed
@@ -114,19 +114,19 @@
         <el-table-column label="产品名称"
           width="150">
           <template scope="item">
-            {{item.row.product_info.name}}
+            {{item.row.product_info?item.row.product_info.name:'获取产品失败'}}
           </template>
         </el-table-column>
         <el-table-column label="sku编码"
           width="150">
           <template scope="item">
-            {{item.row.sku.sku_code}}
+            {{item.row.sku?item.row.sku.sku_code:'获取产品失败'}}
           </template>
         </el-table-column>
         <el-table-column label="规格"
           width="180">
           <template scope="item">
-            <div style="overflow:hidden;white-space:nowrap;text-overflow: ellipsis;">{{getSkuName(item.row.sku.sku_info,item.row.product_info.category_info)}}</div>
+            <div style="overflow:hidden;white-space:nowrap;text-overflow: ellipsis;">{{getSkuName(item.row.sku?item.row.sku.sku_info:null,item.row.product_info?item.row.product_info.category_info:null)}}</div>
           </template>
         </el-table-column>
         <el-table-column label="数量"
@@ -249,6 +249,9 @@ export default Vue.extend({
       return returnObj
     },
     getSkuName(skuInfo: string, categoryInfo: string): string {
+      if (!skuInfo) {
+        return '获取产品失败'
+      }
       let returnStr = ''
       const skuInfoSelf = JSON.parse(skuInfo)
       const deleteObj = this.getUnCombine(categoryInfo)
@@ -415,7 +418,7 @@ export default Vue.extend({
     this.getFilters()
     this.getList()
     store.list().then((res) => {
-      this.store_list = res.data.data
+      this.store_list = res.data.data.items
     })
   }
 })
