@@ -1,6 +1,7 @@
 <template>
   <div class='printHtml'>
-    <div class="printTable">
+    <div class="printTable"
+      v-if="$route.query.printType !== '1'">
       <div style="text-align:center;line-height:40px">产品sku编码打印</div>
       <div class="once">
         <div class="codeCtn"
@@ -21,6 +22,31 @@
                 {{itemSelf}}
               </span>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-else
+      style="display:inline-block">
+      <div class="codeCtn"
+        style="page-break-after: always;"
+        v-for="itemChild in number"
+        :key="itemChild">
+        <svg class="barcode"
+          :jsbarcode-value="'WJC' + filterNumber($route.params.id)">
+        </svg>
+        <div class="otherInfo"
+          style="text-align:center">
+          <div class="line">
+            <span style="margin-right:12px;">{{sku_code}}</span>
+            <span>{{product_name}}</span>
+          </div>
+          <div class="line">
+            <span style="margin-right:12px;"
+              v-for="(itemSelf,indexSelf) in sku_info"
+              :key="indexSelf">
+              {{itemSelf}}
+            </span>
           </div>
         </div>
       </div>
@@ -107,7 +133,8 @@ export default Vue.extend({
           jsbarcode('.barcode')
             .options({
               displayValue: false,
-              height: 50
+              height: 50,
+              width: this.$route.query.printType !== ' 2' ? 1.8 : 2
             })
             .init()
         })

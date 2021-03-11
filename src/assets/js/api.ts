@@ -37,13 +37,18 @@ const order = {
 
 // 库存
 import { SkuStoreSave, StoreInfo } from '@/types/store'
+interface GetSkuStoreNumber {
+  sku_code: string
+  stock_id: number | string
+}
 const store = {
   list: (params?: ListParam) => http.get(`${baseUrl}/edit/store/lists`, params),
   skuDelete: (params: DeleteParam) => http.post(`${baseUrl}/sku/store/log/delete`, params, 'application/json'),
   skuLog: (params: DetailParam) => http.get(`${baseUrl}/sku/store/logs`, params),
   getLogById: (params: DetailParam) => http.get(`${baseUrl}/sku/store/log/detail`, params),
   storeSave: (params: StoreInfo) => http.post(`${baseUrl}/edit/store/save`, params, 'application/json'),
-  skuSave: (params: SkuStoreSave) => http.post(`${baseUrl}/sku/store/save`, params, 'application/json')
+  skuSave: (params: { data: SkuStoreSave[] }) => http.post(`${baseUrl}/sku/store/save`, params, 'application/json'),
+  getSkuStoreNumber: (params: GetSkuStoreNumber) => http.get(`${baseUrl}/sku/store/number`, params)
 }
 
 // 单位

@@ -117,7 +117,7 @@
                   :label="itemHeader"
                   :width="filterWidth(itemHeader)">
                   <template scope="scope">
-                    <span class="text"
+                    <span :class="`text ${itemHeader === '库存数' && 'green' || ''}`"
                       v-if="itemHeader!=='图片' && itemHeader!=='操作'">{{scope.row[filterName(itemHeader)]}}</span>
                     <div class="image"
                       v-if="itemHeader==='图片'"><img :src="scope.row.image_url || require('@/assets/image/noPic.jpg')" /></div>
@@ -125,9 +125,9 @@
                       v-if="itemHeader==='操作'"
                       style="width:140px">
                       <span class="opr orange"
-                        @click="getStoreInfo(scope.row,1)">入库</span>
+                        @click="getStoreInfo(item.sku_info,scope.row,1,item.id)">入库</span>
                       <span class="opr green"
-                        @click="getStoreInfo(scope.row,2)">出库</span>
+                        @click="getStoreInfo(item.sku_info,scope.row,2)">出库</span>
                       <span class="opr blue"
                         @click="getLog(scope.row.sku_code,2)">库存</span>
                     </div>
@@ -156,45 +156,128 @@
           <i class="el-icon-close"
             @click="store_flag=false"></i>
         </div>
-        <div class="content">
-          <div class="row">
-            <div class="label">sku编码：</div>
-            <div class="info text"
-              style="color:#1a95ff">
-              {{store_info.sku_code}}
+        <div class="content"
+          v-if="store_flag === 1">
+          <h2 class="green"
+            style="text-align:center">入库成功！</h2>
+          <div class="normalTb">
+            <div class="thead">
+              <div class="trow">
+                <div class="tcolumn center"
+                  style="flex:0.5">序号</div>
+                <div class="tcolumn center">sku编码</div>
+                <div class="tcolumn center">入库仓库</div>
+                <div class="tcolumn center"
+                  style="flex:0.7">入库数量</div>
+                <div class="tcolumn center"
+                  style="flex:1.5">打印方式</div>
+              </div>
+            </div>
+            <div class="tbody">
+              <div class="trow"
+                v-for="(itemInfo,indexInfo) in goStoreAfterInfo"
+                :key="indexInfo">
+                <div class="tcolumn center"
+                  style="flex:0.5">{{indexInfo + 1}}</div>
+                <div class="tcolumn center blue">{{itemInfo.sku_code}}</div>
+                <div class="tcolumn center">{{itemInfo.store_name}}</div>
+                <div class="tcolumn center"
+                  style="flex:0.7">{{itemInfo.number}}</div>
+                <div class="tcolumn center"
+                  style="flex:1.5;flex-direction:row;
+                  align-items:center">
+                  <span class="btn noBorder noMargin"
+                    style="padding:0"
+                    @click="openPrint(1,itemInfo)">卷纸打印</span>
+                  <span class="btn noBorder"
+                    style="padding:0"
+                    @click="openPrint(2,itemInfo)">A4打印</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="row">
-            <div class="label">{{Number(store_info.type)===1?'入库':'出库'}}数量：</div>
-            <div class="info">
-              <el-input placeholder="请输入数量"
-                v-model="store_info.number">
-              </el-input>
+        </div>
+        <div class="content"
+          v-else>
+          <template v-for="(itemStore,indexStore) in store_info.data">
+            <div class="row"
+              :key="`sku_code_${indexStore}`">
+              <div class="label">sku编码：</div>
+              <div class="info">
+                <el-select :placeholder="`请选择需要${store_info.type === 1 && '入库' || '出库'}的sku产品`"
+                  v-model="itemStore.sku_code"
+                  @change="getStoreNumber(itemStore,true,store_info)">
+                  <el-option v-for="item in store_info.skuArr"
+                    :key="item.id"
+                    :value="item.sku_code"
+                    :label="item.sku_code"></el-option>
+                </el-select>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="label">{{Number(store_info.type)===1?'入库':'出库'}}单价：</div>
-            <div class="info">
-              <el-input placeholder="请输入单价"
-                v-model="store_info.price">
-                <template slot="append">元</template>
-              </el-input>
+            <div class="row"
+              v-if="store_info.type === 2"
+              :key="`store_name_${indexStore}`">
+              <div class="label">选择仓库：</div>
+              <div class="info"
+                style="display:flex;">
+                <el-select placeholder="请选择仓库"
+                  v-model="itemStore.stock_id"
+                  @change="getStoreNumber(itemStore)">
+                  <el-option v-for="item in store_arr"
+                    :key="item.id"
+                    :value="item.id"
+                    :label="item.name"></el-option>
+                </el-select>
+                <el-input placeholder="当前库存剩余数量"
+                  disabled
+                  style="margin-left:16px"
+                  v-model="itemStore.stock_number">
+                </el-input>
+              </div>
             </div>
-          </div>
+            <div class="row"
+              :key="`number_price_${indexStore}`">
+              <div class="label">{{Number(store_info.type)===1?'入库':'出库'}}数量：</div>
+              <div class="info"
+                style="display:flex;">
+                <el-input placeholder="请输入数量"
+                  v-model="itemStore.number">
+                </el-input>
+                <el-input :placeholder="`请输入${Number(store_info.type)===1?'入库':'出库'}单价`"
+                  style="margin-left:16px"
+                  v-model="itemStore.price">
+                  <template slot="append">元</template>
+                </el-input>
+              </div>
+            </div>
+            <div class="row"
+              :key="`handle_button_${indexStore}`">
+              <div class="info"
+                style="display:flex;justify-content:flex-end">
+                <div v-if="indexStore === 0"
+                  style="border:1px solid #1A95FF;color:#1A95FF;line-height:32px;border-radius:4px;padding: 0 1em;cursor: pointer;"
+                  @click="addItem(store_info.data)">添加下一组</div>
+                <div v-else
+                  style="border:1px solid #F5222D;color:#F5222D;line-height:32px;border-radius:4px;padding: 0 1em;cursor: pointer;margin-left:16px"
+                  @click="deleteItem(store_info.data,indexStore)">删除</div>
+              </div>
+            </div>
+          </template>
           <div class="row"
             v-if="Number(store_info.type)===2">
             <div class="label">出库单位：</div>
             <div class="info">
-              <el-input placeholder="请输入库存去向"
-                v-model="store_info.client_name">
-              </el-input>
+              <el-autocomplete v-model="store_info.out_client_name"
+                :fetch-suggestions="querySearchOutClient"
+                placeholder="请输入库存去向"></el-autocomplete>
             </div>
           </div>
-          <div class="row">
-            <div class="label">选择仓库：</div>
+          <div class="row"
+            v-if="Number(store_info.type)===1">
+            <div class="label">入库仓库：</div>
             <div class="info">
               <el-select placeholder="请选择仓库"
-                v-model="store_info.stock_id">
+                v-model="store_info.go_store_id">
                 <el-option v-for="item in store_arr"
                   :key="item.id"
                   :value="item.id"
@@ -212,10 +295,16 @@
           </div>
         </div>
         <div class="opr">
-          <div class="btn btnGray"
-            @click="store_flag=false">取消</div>
-          <div class="btn btnBlue"
-            @click="saveStore">确定</div>
+          <template v-if="store_flag === 1">
+            <div class="btn btnBlue"
+              @click="store_flag = false">确定</div>
+          </template>
+          <template v-else>
+            <div class="btn btnGray"
+              @click="store_flag=false">取消</div>
+            <div class="btn btnBlue"
+              @click="saveStore">确定</div>
+          </template>
         </div>
       </div>
     </div>
@@ -330,18 +419,39 @@ import { product, store, client, user } from '@/assets/js/api'
 import { ProductForm, SkuInfo } from '@/types/product'
 import { SkuStoreSave } from '@/types/store'
 export default Vue.extend({
-  data(): { list: ProductForm[]; store_info: SkuStoreSave; [propName: string]: any } {
+  data(): {
+    list: ProductForm[]
+    store_info: {
+      product_id?: string | number
+      skuArr: SkuInfo[]
+      desc: string
+      go_store_id: string | number
+      out_client_name: string
+      type: 1 | 2
+      data: SkuStoreSave[]
+    }
+    [propName: string]: any
+  } {
     return {
       loading: true,
       store_info: {
-        sku_code: '',
-        number: '',
-        stock_id: '',
-        price: '',
-        client_name: '',
-        type: '', // 1入库，2出库
-        order_id: '',
-        desc: ''
+        skuArr: [],
+        desc: '',
+        go_store_id: '',
+        out_client_name: '',
+        type: 1,
+        data: [
+          {
+            sku_code: '',
+            number: '',
+            stock_id: '',
+            price: '',
+            client_name: '',
+            type: '', // 1入库，2出库
+            order_id: '',
+            desc: ''
+          }
+        ]
       },
       store_flag: false,
       store_arr: [],
@@ -376,10 +486,71 @@ export default Vue.extend({
       sku_flag: false,
       sku_list: [],
       list: [],
-      date: []
+      date: [],
+      goStoreAfterInfo: []
     }
   },
   methods: {
+    openPrint(type: 1 | 2, itemInfo: any) {
+      window.open(
+        `/print/printSkuByPro/${itemInfo.sku_id}/${itemInfo.number || 1}/${itemInfo.product_id}?printType=${type}`
+      )
+    },
+    getStoreNumber(item: SkuStoreSave, flag: boolean = false, storeInfo: any) {
+      if (flag) {
+        // 选择sku产品自动填充价格
+        const finded = storeInfo.skuArr.find((itemF: any) => itemF.sku_code === item.sku_code)
+        if (finded && storeInfo.type === 1) {
+          item.price = finded.cost_price
+        } else if (finded && storeInfo.type === 2) {
+          item.price = finded.price
+        }
+      }
+      if (!item.sku_code) {
+        item.stock_number = 0
+        this.$forceUpdate()
+        return
+      }
+      if (!item.stock_id) {
+        item.stock_number = 0
+        this.$forceUpdate()
+        return
+      }
+      store
+        .getSkuStoreNumber({
+          sku_code: item.sku_code,
+          stock_id: item.stock_id
+        })
+        .then((res) => {
+          if (res.data.status !== false) {
+            item.stock_number = res.data.data
+            this.$forceUpdate()
+          }
+        })
+    },
+    addItem(data: SkuStoreSave[]) {
+      data.push({
+        sku_code: '',
+        number: '',
+        stock_id: '',
+        price: '',
+        client_name: '',
+        type: '', // 1入库，2出库
+        order_id: '',
+        desc: ''
+      })
+    },
+    deleteItem(data: SkuStoreSave[], index: number) {
+      if (data.length === 1) {
+        this.$message.warning('最少保留一组数据')
+        return
+      }
+      data.splice(index, 1)
+    },
+    querySearchOutClient(queryString: string, callback: (returnArr: Array<{ value: string }>) => void) {
+      const list = JSON.parse(window.sessionStorage.getItem('outStoreClient') || JSON.stringify([]))
+      callback(queryString ? list.filter((itemF: { value: string }) => itemF.value.indexOf(queryString)) : list)
+    },
     reset() {
       this.$router.push('/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0')
     },
@@ -458,7 +629,7 @@ export default Vue.extend({
       if (str === '图片') {
         return 120
       } else if (str === 'sku编码') {
-        return 120
+        return 140
       } else if (str === '成本价') {
         return 80
       } else if (str === '零售价') {
@@ -471,17 +642,121 @@ export default Vue.extend({
         return 160
       }
     },
-    getStoreInfo(sku: SkuInfo, type: number): void {
-      this.store_info.sku_code = sku.sku_code
-      this.store_info.type = type
-      this.store_info.price = type === 1 ? sku.cost_price : sku.price
+    getStoreInfo(skus: SkuInfo[], sku: SkuInfo, type: 1 | 2, productId?: number | string): void {
+      this.store_info = {
+        skuArr: skus,
+        product_id: productId,
+        desc: '',
+        go_store_id: '',
+        out_client_name: '',
+        type,
+        data: [
+          {
+            sku_code: sku.sku_code,
+            number: '',
+            stock_id: '',
+            price: type === 1 ? sku.cost_price : sku.price,
+            client_name: '',
+            type: '', // 1入库，2出库
+            order_id: '',
+            desc: ''
+          }
+        ]
+      }
       this.store_flag = true
     },
     saveStore(): void {
-      store.skuSave(this.store_info).then((res) => {
-        if (res.data.status) {
+      const flag = {
+        go_store_id: true,
+        out_client_name: true,
+        sku_code: true,
+        number: true,
+        out_store_id: true,
+        price: true
+      }
+      if (this.store_info.type === 1) {
+        flag.go_store_id = !!this.store_info.go_store_id
+      } else {
+        flag.out_client_name = !!this.store_info.out_client_name
+      }
+      const data = this.store_info.data.map((itemM) => {
+        if (!itemM.sku_code) {
+          flag.sku_code = false
+        }
+        if (!itemM.number) {
+          flag.number = false
+        }
+        if (!itemM.stock_id && this.store_info.type === 2) {
+          flag.out_store_id = false
+        }
+        if (!itemM.price) {
+          flag.price = false
+        }
+        return {
+          sku_code: itemM.sku_code,
+          number: itemM.number,
+          stock_id: this.store_info.type === 1 ? this.store_info.go_store_id : itemM.stock_id,
+          price: itemM.price,
+          client_name: this.store_info.out_client_name || '',
+          type: this.store_info.type,
+          order_id: '',
+          desc: this.store_info.desc
+        }
+      })
+      if (this.store_info.type === 1) {
+        this.goStoreAfterInfo = this.store_info.data.map((itemM) => {
+          const skuInfo = this.store_info.skuArr.find((itemF) => itemF.sku_code === itemM.sku_code)
+          const storeInfo = this.store_arr.find((itemF: any) => itemF.id === this.store_info.go_store_id)
+          return {
+            product_id: this.store_info.product_id,
+            sku_id: skuInfo && skuInfo.id,
+            sku_code: itemM.sku_code,
+            number: itemM.number,
+            stock_id: this.store_info.go_store_id,
+            store_name: storeInfo && storeInfo.name
+          }
+        })
+      }
+      if (!flag.go_store_id) {
+        this.$message.warning(`请选择入库仓库`)
+        return
+      }
+      if (!flag.out_client_name) {
+        this.$message.warning('请输入出库单位')
+        return
+      }
+      if (!flag.sku_code) {
+        this.$message.warning(`请选择${this.store_info.type === 1 ? '入' : '出'}库的sku产品`)
+        return
+      }
+      if (!flag.number) {
+        this.$message.warning(`请输入${this.store_info.type === 1 ? '入' : '出'}库数量`)
+        return
+      }
+      if (!flag.out_store_id) {
+        this.$message.warning('请选择出库仓库')
+        return
+      }
+      if (!flag.price) {
+        this.$message.warning(`请输入${this.store_info.type === 1 ? '入' : '出'}库单价`)
+        return
+      }
+      store.skuSave({ data }).then((res) => {
+        if (res.data.status !== false) {
           this.$message.success(Number(this.store_info.type) === 1 ? '入库成功' : '出库成功')
-          this.store_flag = false
+          if (this.store_info.type === 1) {
+            this.store_flag = 1
+          } else {
+            this.store_flag = false
+          }
+          if (this.store_info.type !== 1) {
+            // 添加出库单位本地缓存
+            const list = JSON.parse(window.sessionStorage.getItem('outStoreClient') || JSON.stringify([]))
+            list.push({
+              value: this.store_info.out_client_name
+            })
+            window.sessionStorage.setItem('outStoreClient', JSON.stringify(list))
+          }
           this.getList()
         }
       })
@@ -527,8 +802,8 @@ export default Vue.extend({
               this.$message.warning('该产品暂无相关的出入库日志')
             }
           } else {
-            if (res.data.data.items.length > 0) {
-              this.sku_list = this.$mergeData(res.data.data.items, {
+            if (res.data.data.length > 0) {
+              this.sku_list = this.$mergeData(res.data.data, {
                 mainRule: 'stock_id',
                 otherRule: [{ name: 'stock_name' }]
               })

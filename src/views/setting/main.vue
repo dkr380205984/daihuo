@@ -362,6 +362,7 @@
             </div>
             <div class="inputCtn">
               <el-input v-model="client_info.prefix"
+                @input="filterPrefix"
                 placeholder="请输入供应商首字母简称，如桐庐凯瑞，输入TLKR或KR"></el-input>
             </div>
           </div>
@@ -564,6 +565,13 @@ export default Vue.extend({
     }
   },
   methods: {
+    filterPrefix(value: string) {
+      const reg = /^\w{0,6}$/
+      if (!reg.test(value)) {
+        this.client_info.prefix = value.slice(0, value.length - 1)
+        this.$message.warning('简称只能有字母、数字或下划线组成，且不可超出6位')
+      }
+    },
     changeRouter(page: number | string, reset?: boolean) {
       if (reset) {
         this.keyword = ''
