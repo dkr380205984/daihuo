@@ -155,7 +155,7 @@
           <div class="codeCtn">
             <div class="code">
               <img style="width:100%;height:100%"
-                src="https://zhihui.tlkrzf.com/1610079833000.jpg" />
+                src="https://file.zwyknit.com/1610079833000.jpg" />
             </div>
             <div class="text">扫一扫使用微信小程序</div>
           </div>

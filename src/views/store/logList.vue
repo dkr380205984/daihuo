@@ -97,10 +97,10 @@
           width="55">
         </el-table-column>
         <el-table-column fixed
-          label="产品编号"
+          label="日志编号"
           width="150">
           <template scope="item">
-            {{item.row.product_info?item.row.product_info.product_code:'获取产品失败'}}
+            {{item.row.id}}
           </template>
         </el-table-column>
         <el-table-column fixed
@@ -418,7 +418,7 @@ export default Vue.extend({
     this.getFilters()
     this.getList()
     store.list().then((res) => {
-      this.store_list = res.data.data.items
+      this.store_list = res.data.data
     })
   }
 })

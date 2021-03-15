@@ -43,7 +43,8 @@
               </div>
             </div>
           </div>
-          <div class="lineCtn">
+          <div class="lineCtn"
+            v-if="userType!==4">
             <div class="label must">产品类型：</div>
             <div class="line">
               <div class="eldom"
@@ -622,7 +623,12 @@ export default Vue.extend({
         id: this.$route.params.id,
         name: this.product_name,
         category_id: this.product_type,
-        type: this.type ? '现货' : '期货',
+        type:
+          JSON.parse(window.localStorage.getItem('userInfo') as string).type === 4
+            ? '期货'
+            : this.type
+            ? '现货'
+            : '期货',
         category_info: JSON.stringify(this.render_data), // 备份render_data，在修改页还可以用，不然要根据table_data反刍一个render_data出来，太恶心了
         sku_info: this.table_data.render_content.map(
           (item, index): SkuInfo => {
@@ -664,7 +670,7 @@ export default Vue.extend({
     },
     handleImgSuccess(res: any, file: any, itemRow: any, name: any) {
       console.log(itemRow, name)
-      itemRow[name] = 'https://zhihui.tlkrzf.com/' + res.key
+      itemRow[name] = 'https://file.zwyknit.com/' + res.key
       this.$forceUpdate()
     },
     beforeAvatarUpload(file: any) {
@@ -685,7 +691,7 @@ export default Vue.extend({
       }
     },
     successFile(response: any, file: any, fileList: any[]) {
-      this.product_image.push({ id: null, url: 'https://zhihui.tlkrzf.com/' + response.key })
+      this.product_image.push({ id: null, url: 'https://file.zwyknit.com/' + response.key })
     },
     beforeRemove(file: any, fileList: any[]) {
       let deleteIndex = 0
@@ -722,6 +728,7 @@ export default Vue.extend({
       this.product_name = data.name
       this.product_type = data.category_id
       this.product_brand = data.brand_id
+      this.from_client = data.client_id
       this.type = data.type === '现货' ? true : false
       this.product_image = data.images.map((item) => {
         return {

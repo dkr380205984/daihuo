@@ -1,14 +1,15 @@
 <template>
   <div class='printHtml'>
     <div class="printTable small"
-      v-for="itemClient in list"
+      v-for="(itemClient) in list"
       :key="itemClient.id">
-      <div style="text-align:center;line-height:41px;font-size:20px;font-weight:bold;letter-spacing:2px">围巾城{{$route.params.type==='1'?'入库':'出库'}}单</div>
+      <div style="text-align:center;line-height:41px;font-size:20px;font-weight:bold;letter-spacing:2px">围巾城{{$route.params.type==='1'?'入库':'出库'}}单({{itemClient.page}}/{{itemClient.totalPage}})</div>
       <div class="print_body">
         <div class="print_row bgGray">
           <span class="row_item center bgGray"
             style="flex:0.5">序号</span>
-          <span class="row_item center">产品编号</span>
+          <span class="row_item center"
+            style="flex:0.5">日志编号</span>
           <span class="row_item center">产品名称</span>
           <span class="row_item center">sku编码</span>
           <span class="row_item center"
@@ -25,8 +26,9 @@
           class="print_row">
           <template v-if="itemClient.childrenMergeInfo.length>=index">
             <span class="row_item center bgGray"
-              style="flex:0.5">{{index}}</span>
-            <span class="row_item center">{{itemClient.childrenMergeInfo[index-1].product_code}}</span>
+              style="flex:0.5">{{itemClient.childrenMergeInfo[index-1].index}}</span>
+            <span class="row_item center"
+              style="flex:0.5">{{itemClient.childrenMergeInfo[index-1].id}}</span>
             <span class="row_item center">{{itemClient.childrenMergeInfo[index-1].product_name}}</span>
             <span class="row_item center">{{itemClient.childrenMergeInfo[index-1].sku_code}}</span>
             <span class="row_item center"
@@ -40,8 +42,9 @@
           </template>
           <template v-else>
             <span class="row_item center bgGray"
-              style="flex:0.5">{{index}}</span>
-            <span class="row_item center "></span>
+              style="flex:0.5"></span>
+            <span class="row_item center"
+              style="flex:0.5"></span>
             <span class="row_item center"></span>
             <span class="row_item center"></span>
             <span class="row_item center"
@@ -55,8 +58,8 @@
           </template>
         </div>
         <div class="print_row">
-          <span class="row_item center bgGray">合计金额</span>
-          <span class="row_item center">{{total_price}}元</span>
+          <span class="row_item center bgGray">单张/合计金额</span>
+          <span class="row_item center">{{itemClient.current_price}}元/{{itemClient.total_price}}元</span>
           <span class="row_item center bgGray">打印日期</span>
           <span class="row_item center">{{$getDate(new Date())}}</span>
           <span class="row_item center bgGray">{{$route.params.type==='1'?'发货':'收货'}}人签字</span>
@@ -67,7 +70,7 @@
           <span class="row_item center bgGray">{{$route.params.type==='1'?'供货':'出库'}}单位</span>
           <span class="row_item center">{{itemClient.client_name}}</span>
           <span class="row_item center bgGray">制单员/电话</span>
-          <span class="row_item center"></span>
+          <span class="row_item center">{{name}}/{{phone}}</span>
           <span class="row_item center bgGray">客户签字</span>
           <span class="row_item center"></span>
         </div>
@@ -86,7 +89,8 @@ export default Vue.extend({
   } {
     return {
       list: [],
-      total_price: 0
+      phone: JSON.parse(window.localStorage.getItem('userInfo') as string).phone,
+      name: JSON.parse(window.localStorage.getItem('userInfo') as string).name
     }
   },
   methods: {
@@ -134,6 +138,7 @@ export default Vue.extend({
     getList(data: any[]): any[] {
       const selfData = this.$clone(data).map((item: any) => {
         return {
+          id: item.id,
           client_name: item.product_info.client_name,
           client_id: item.product_info.client_id,
           number: item.number,
@@ -153,26 +158,49 @@ export default Vue.extend({
           otherRule: [
             { name: 'sku_info' },
             { name: 'product_code' },
+            { name: 'id' },
             { name: 'category_info' },
             { name: 'product_name' }
           ]
         }
       })
+      mergeData.forEach((item: any) => {
+        item.childrenMergeInfo.forEach((itemChild: any, indexChild: number) => {
+          itemChild.index = indexChild + 1
+        })
+        item.total_price = item.childrenMergeInfo.reduce((total: number, current: any) => {
+          return (
+            total +
+            current.childrenMergeInfo.reduce((totalChild: number, currentChild: any) => {
+              return totalChild + currentChild.number * (Number(current.price) || 0)
+            }, 0)
+          )
+        }, 0)
+      })
+      console.log(mergeData)
       const returnData: any[] = []
       mergeData.forEach((itemClient: any) => {
         let start = 0
         const end = itemClient.childrenMergeInfo.length
+        let nowPage = 1
         while (end - start > 9) {
           returnData.push({
             client_name: itemClient.client_name,
             client_id: itemClient.client_id,
+            page: nowPage,
+            totalPage: Math.ceil(end / 9),
+            total_price: itemClient.total_price,
             childrenMergeInfo: itemClient.childrenMergeInfo.slice(start, start + 9)
           })
+          nowPage++
           start += 9
         }
         returnData.push({
           client_name: itemClient.client_name,
           client_id: itemClient.client_id,
+          page: nowPage,
+          totalPage: Math.ceil(end / 9),
+          total_price: itemClient.total_price,
           childrenMergeInfo: itemClient.childrenMergeInfo.slice(start, end)
         })
       })
@@ -185,6 +213,14 @@ export default Vue.extend({
             return total + current.number * (Number(itemSku.price) || 0)
           }, 0)
         })
+        itemClient.current_price = itemClient.childrenMergeInfo.reduce((total: number, current: any) => {
+          return (
+            total +
+            current.childrenMergeInfo.reduce((totalChild: number, currentChild: any) => {
+              return totalChild + currentChild.number * (Number(current.price) || 0)
+            }, 0)
+          )
+        }, 0)
       })
       return returnData
     }
@@ -195,17 +231,7 @@ export default Vue.extend({
         id: this.$route.params.id.split(',')
       })
       .then((res) => {
-        console.log(res)
         this.list = this.getList(res.data.data)
-        console.log(this.list)
-        this.total_price = this.list.reduce((total, current) => {
-          return (
-            total +
-            current.childrenMergeInfo.reduce((totalChild: number, currentChild: any) => {
-              return totalChild + currentChild.total_price
-            }, 0)
-          )
-        }, 0)
       })
   }
 })
