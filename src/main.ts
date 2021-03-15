@@ -7,6 +7,8 @@ import 'element-ui/lib/theme-chalk/index.css';
 import VueParticles from 'vue-particles';
 import plugin from '@/assets/js/plugin'
 import mycomponent from './components'
+// symbol方式引入iconfont 图标
+import '@/assets/font/iconfont.js'
 Vue.use(plugin)
 Vue.config.productionTip = false;
 Vue.use(VueParticles)

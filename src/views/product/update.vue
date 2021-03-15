@@ -221,7 +221,8 @@
                       <div class="trow">
                         <div class="tcolumn min120"
                           v-for="(item,index) in table_data.header"
-                          :key="index">
+                          :key="index"
+                          :style="(item.name==='零售价'||item.name==='成本价') && 'min-width:160px' || ''">
                           <div>{{filterName(item.name)}}
                             <span v-if="filterName(item.name)==='sku编码'"
                               class="blue"
@@ -237,7 +238,8 @@
                         :key="indexRow">
                         <div class="tcolumn min120"
                           v-for="(item,index) in table_data.header"
-                          :key="index">
+                          :key="index"
+                          :style="(item.name==='零售价'||item.name==='成本价') && 'min-width:160px' || ''">
                           <!-- 只有sku编码不能改 -->
                           <span v-if="item.name === 'sku编码'"
                             :style="{'color':item.is_required &&!itemRow[filterName(item.name)]?'#F5222D':''}">
@@ -364,7 +366,7 @@ export default Vue.extend({
             }
           }
         )
-        this.table_data.header = this.table_data.header.concat([
+        this.table_data.header.unshift(
           {
             is_combine: false,
             is_required: true,
@@ -380,7 +382,7 @@ export default Vue.extend({
             is_required: true,
             name: '图片'
           }
-        ])
+        )
         this.table_data.header.unshift({
           firstName: 'sku编码',
           is_combine: false,

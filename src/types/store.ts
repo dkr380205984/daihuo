@@ -3,6 +3,7 @@ export interface SkuStoreSave {
   sku_code: string
   number: number | string
   stock_id: number | string
+  stock_number?: number | string // 出库选择仓库的库存数字段
   type: number | string // 1入库，2出库
   order_id: number | string
   price: number | string

@@ -300,6 +300,48 @@
         </div>
       </div>
     </div>
+    <div class="popup"
+      v-if="printPopupFlag">
+      <div class="main"
+        style="width:500px">
+        <div class="title">
+          <div class="text">提示</div>
+          <i class="el-icon-close"
+            @click="printPopupFlag=false;"></i>
+        </div>
+        <div class="content">
+          <div class="row"
+            style="flex-direction: column;">
+            <div class="label"
+              style="width:100%;text-align:left">请选择打印方式：</div>
+            <div class="info">
+              <el-radio-group v-model="printInfo.type"
+                style="line-height:40px">
+                <el-radio :label="1">卷纸打印</el-radio>
+                <el-radio :label="2">A4纸打印</el-radio>
+              </el-radio-group>
+            </div>
+          </div>
+          <div class="row"
+            style="flex-direction: column;">
+            <div class="label"
+              style="width:100%;text-align:left">请输入需要打印的张数：</div>
+            <div class="info">
+              <el-input v-model="printInfo.number"
+                style="height:40px"
+                placeholder="默认“1”张">
+              </el-input>
+            </div>
+          </div>
+        </div>
+        <div class="opr">
+          <div class="btn btnGray"
+            @click="printPopupFlag=false">取消</div>
+          <div class="btn btnBlue"
+            @click="goPrint(false)">确定</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -357,6 +399,12 @@ export default Vue.extend({
       log_sts: {
         inNum: 0,
         outNum: 0
+      },
+      printSku: null,
+      printPopupFlag: false,
+      printInfo: {
+        type: 1,
+        number: ''
       }
     }
   },
@@ -438,25 +486,62 @@ export default Vue.extend({
       }
       Chart.setOption(option)
     },
-    goPrint(skuCode: string) {
-      const sku = this.sku_data.find((item: SkuInfo) => item.sku_code === skuCode)
-      this.$prompt('请输入需要打印的张数：', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消'
-      })
-        .then((obj: any) => {
-          if (obj.value) {
-            window.open('/print/printSkuByPro/' + sku.id + '/' + obj.value + '/' + this.$route.params.id)
-          } else {
-            this.$message.error('请输入打印张数')
-          }
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消'
-          })
-        })
+    goPrint(skuCode: string | boolean) {
+      if (!skuCode) {
+        window.open(
+          '/print/printSkuByPro/' +
+            this.printSku.id +
+            '/' +
+            (this.printInfo.number || 1) +
+            '/' +
+            this.$route.params.id +
+            '?printType=' +
+            this.printInfo.type
+        )
+        this.printPopupFlag = false
+        this.printInfo = {
+          type: 1,
+          number: ''
+        }
+        this.printSku = null
+        return
+      }
+      this.printSku = this.sku_data.find((item: SkuInfo) => item.sku_code === skuCode)
+      this.printPopupFlag = true
+      // this.$prompt('请选择打印：', '提示', {
+      //   confirmButtonText: '确定',
+      //   cancelButtonText: '取消'
+      // })
+      //   .then((obj: any) => {
+      //     if (obj.value) {
+      //       window.open('/print/printSkuByPro/' + sku.id + '/' + obj.value + '/' + this.$route.params.id)
+      //     } else {
+      //       this.$message.error('请输入打印张数')
+      //     }
+      //   })
+      //   .catch(() => {
+      //     this.$message({
+      //       type: 'info',
+      //       message: '已取消'
+      //     })
+      //   })
+      // this.$prompt('请输入需要打印的张数：', '提示', {
+      //   confirmButtonText: '确定',
+      //   cancelButtonText: '取消'
+      // })
+      //   .then((obj: any) => {
+      //     if (obj.value) {
+      //       window.open('/print/printSkuByPro/' + sku.id + '/' + obj.value + '/' + this.$route.params.id)
+      //     } else {
+      //       this.$message.error('请输入打印张数')
+      //     }
+      //   })
+      //   .catch(() => {
+      //     this.$message({
+      //       type: 'info',
+      //       message: '已取消'
+      //     })
+      //   })
     },
     // 日志统计
     stsLog(): void {

@@ -90,7 +90,7 @@
           <div class="trowCtn">
             <div class="trow">
               <div class="tcolumn"
-                style="flex:1.3">产品编号</div>
+                style="flex:1.5">产品编号</div>
               <div class="tcolumn"
                 style="flex:1.2">产品名称</div>
               <div class="tcolumn"
@@ -110,7 +110,7 @@
             :key="item.id">
             <div class="trow">
               <div class="tcolumn flexRow"
-                style="justify-content:space-between;flex:1.3">
+                style="justify-content:space-between;flex:1.5">
                 <span>
                   <span class="circle"
                     :class="{'green':item.type==='现货','orange':item.type==='期货'}">{{item.type==='现货'?'现':'期'}}</span>

@@ -220,7 +220,8 @@
                       <div class="trow">
                         <div class="tcolumn min120"
                           v-for="(item,index) in table_data.header"
-                          :key="index">{{filterName(item.name)}}</div>
+                          :key="index"
+                          :style="(filterName(item.name)==='零售价'||filterName(item.name)==='成本价') && `min-width:160px` || ''">{{filterName(item.name)}}</div>
                       </div>
                     </div>
                     <div class="tbody">
@@ -228,6 +229,7 @@
                         v-for="(itemRow,indexRow) in table_data.render_content"
                         :key="indexRow">
                         <div class="tcolumn min120"
+                          :style="(item.name==='零售价'||item.name==='成本价') && `min-width:160px` || ''"
                           v-for="(item,index) in table_data.header"
                           :key="index">
                           <span v-if="item.firstName"
@@ -379,7 +381,7 @@ export default Vue.extend({
             }
           }
         )
-        this.table_data.header = this.table_data.header.concat([
+        this.table_data.header.unshift(
           {
             is_combine: false,
             is_required: true,
@@ -395,7 +397,7 @@ export default Vue.extend({
             is_required: true,
             name: '图片'
           }
-        ])
+        )
         // 第二步,想办法把render_data的输入信息和table_data联系起来,用key来保存render_data的索引
         // 因为render_data一旦生成,他的数组特性保证了数据顺序不变,所以table_data只需要寻址一次就可以复用这个索引
         // 注意，单价/库存/sku编码信息的索引值为-1

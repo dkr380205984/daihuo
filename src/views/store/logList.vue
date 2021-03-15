@@ -163,6 +163,14 @@
         </el-table-column>
       </el-table>
     </div>
+    <div class="pageCtn">
+      <el-pagination background
+        :current-page.sync="pages"
+        :page-size="15"
+        layout="prev, pager, next"
+        :total="total">
+      </el-pagination>
+    </div>
   </div>
 </template>
 
@@ -201,7 +209,8 @@ export default Vue.extend({
       list: [],
       selectList: [],
       date: [],
-      chooseAll: false
+      pages: 1,
+      total: 1
     }
   },
   filters: {
@@ -211,23 +220,30 @@ export default Vue.extend({
     }
   },
   watch: {
-    chooseAll(newVal) {
-      this.list.forEach((item) => {
-        item.checked = newVal
-      })
-    },
-    page(newVal) {
+    pages(newVal) {
       this.changeRouter(newVal)
     },
     $route(newVal) {
       // 点击返回的时候更新下筛选条件
       this.getFilters()
-      this.getList()
+      this.getList(this.pages)
     }
   },
   methods: {
     handleSelectionChange(val: StoreInfo[]) {
-      this.selectList = val
+      const notSelectItems = this.list.filter((itemF) => !val.find((itemFind) => itemFind.id === itemF.id))
+      val.forEach((itemF) => {
+        const finded = this.selectList.find((itemFind) => itemFind.id === itemF.id)
+        if (!finded) {
+          this.selectList.push(itemF)
+        }
+      })
+      notSelectItems.forEach((itemF) => {
+        const findIndex = this.selectList.findIndex((itemFind) => itemFind.id === itemF.id)
+        if (findIndex >= 0) {
+          this.selectList.splice(findIndex, 1)
+        }
+      })
     },
     // 把非组合项找出来
     getUnCombine(categoryInfo: string): string[] {
@@ -273,13 +289,12 @@ export default Vue.extend({
       })
       return returnStr.substring(0, returnStr.length - 1)
     },
-    getList() {
+    getList(pages: number = 1, limit: number = 15) {
       this.loading = true
-      this.chooseAll = false
       store
         .skuLog({
-          page: 1,
-          limit: 999,
+          page: pages,
+          limit,
           stock_id: this.store_id,
           id: '',
           data_source: this.source,
@@ -292,6 +307,27 @@ export default Vue.extend({
         })
         .then((res) => {
           this.list = res.data.data.items
+          this.total = res.data.data.total
+          // 更新当前页勾选状态
+          const selectItems: any = []
+          this.list.forEach((itemF) => {
+            const finded = this.selectList.find((itemFind) => itemFind.id === itemF.id)
+            if (finded) {
+              selectItems.push(itemF)
+            }
+          })
+          // 采用微任务将执行延后  以达到避开el-table中selection-change在切换页码时此执行快于其本身执行
+          // 其实就是在Dom更新后去执行
+          this.$nextTick(() => {
+            selectItems.forEach((itemF: any) => {
+              const multipleTable = this.$refs.multipleTable as any
+              multipleTable.toggleRowSelection(itemF)
+            })
+          })
+          // 更新页码
+          if (pages !== this.pages) {
+            this.pages = pages
+          }
           this.loading = false
         })
     },
@@ -344,7 +380,7 @@ export default Vue.extend({
     // 更新筛选条件
     getFilters() {
       const params = this.$getHash(this.$route.params.params)
-      this.page = Number(params.page)
+      this.pages = Number(params.page) || 1
       this.keyword = params.keyword
       this.type = (params.type && Number(params.type)) || 0
       this.store_id = params.store_id && Number(params.store_id)
@@ -357,7 +393,6 @@ export default Vue.extend({
       }
     },
     goPrint() {
-      console.log(this.selectList)
       const arrIn = this.selectList.filter((item: StoreInfo) => item.type === 1)
       const arrOut = this.selectList.filter((item: StoreInfo) => item.type === 2)
       if (arrIn.length > 0 && arrOut.length > 0) {
@@ -416,7 +451,7 @@ export default Vue.extend({
   },
   mounted() {
     this.getFilters()
-    this.getList()
+    this.getList(this.pages)
     store.list().then((res) => {
       this.store_list = res.data.data
     })
