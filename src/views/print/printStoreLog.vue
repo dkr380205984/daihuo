@@ -122,11 +122,15 @@ export default Vue.extend({
       const storeNum = '库存数'
       const image = '图片'
       const sku = 'sku编码'
+      const onlinePrice = '线上价'
+      const offlinePrice = '线下价'
       delete skuInfoSelf[costPrice]
       delete skuInfoSelf[price]
       delete skuInfoSelf[storeNum]
       delete skuInfoSelf[image]
       delete skuInfoSelf[sku]
+      delete skuInfoSelf[onlinePrice]
+      delete skuInfoSelf[offlinePrice]
       deleteObj.forEach((item: string) => {
         delete skuInfoSelf[item]
       })
@@ -139,7 +143,7 @@ export default Vue.extend({
       const selfData = this.$clone(data).map((item: any) => {
         return {
           id: item.id,
-          client_name: item.product_info.client_name,
+          client_name: this.$route.params.type === '1' ? item.product_info.client_name : item.client_name,
           client_id: item.product_info.client_id,
           number: item.number,
           category_info: item.product_info.category_info,
@@ -151,8 +155,8 @@ export default Vue.extend({
         }
       })
       const mergeData = this.$mergeData(selfData, {
-        mainRule: 'client_id',
-        otherRule: [{ name: 'client_name' }],
+        mainRule: this.$route.params.type === '1' ? 'client_id' : 'client_name',
+        otherRule: this.$route.params.type === '1' ? [{ name: 'client_name' }] : [],
         childrenRule: {
           mainRule: ['sku_code', 'price'],
           otherRule: [

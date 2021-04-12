@@ -238,7 +238,7 @@
             <div class="row"
               :key="`number_price_${indexStore}`">
               <div class="label">{{Number(store_info.type)===1?'入库':'出库'}}数量：</div>
-              <div class="info"
+              <div class="info cutPriceOut"
                 style="display:flex;">
                 <el-input placeholder="请输入数量"
                   v-model="itemStore.number">
@@ -248,6 +248,16 @@
                   v-model="itemStore.price">
                   <template slot="append">元</template>
                 </el-input>
+                <div class="cutPriceCom"
+                  v-if="store_info.type === 2">
+                  <span class="top el-icon-caret-top"
+                    @click="changePriceType(itemStore,-1)"></span>
+                  <span :class="`show ${itemStore.price_type === itemPrice.type && 'active'}`"
+                    v-for="(itemPrice,indexPrice) in itemStore.priceArr"
+                    :key="indexPrice">{{itemPrice.name}}</span>
+                  <span class="bottom el-icon-caret-bottom"
+                    @click="changePriceType(itemStore,1)"></span>
+                </div>
               </div>
             </div>
             <div class="row"
@@ -340,6 +350,7 @@
                     <div class="tcolumn">类型</div>
                     <div class="tcolumn">sku编码</div>
                     <div class="tcolumn">数量</div>
+                    <div class="tcolumn">单价类型</div>
                     <div class="tcolumn">单价</div>
                     <div class="tcolumn">仓库</div>
                     <div class="tcolumn">出库单位</div>
@@ -356,6 +367,7 @@
                       :class="{'orange':item.type===1,'blue':item.type===2}">{{item.type===1?'入库':'出库'}}</div>
                     <div class="tcolumn">{{item.sku.sku_code}}</div>
                     <div class="tcolumn">{{item.number}}</div>
+                    <div class="tcolumn">{{item.price_type|filterPriceType}}</div>
                     <div class="tcolumn">{{item.price}}元</div>
                     <div class="tcolumn">{{item.stock_name}}</div>
                     <div class="tcolumn">{{item.client_name||'无'}}</div>
@@ -491,6 +503,31 @@ export default Vue.extend({
     }
   },
   methods: {
+    changePriceType(item: any, type: 1 | -1) {
+      const nowIndex = item.priceArr.findIndex((itemF: any) => itemF.type === item.price_type)
+      if (nowIndex === -1) {
+        item.price = 0
+        item.price_type = ''
+        this.$message.warning('未知错误，当前价格类型不存在')
+        return
+      }
+      let nextIndex = nowIndex + type
+      if (nextIndex >= 0) {
+        nextIndex = nextIndex % item.priceArr.length
+      } else {
+        nextIndex = item.priceArr.length - 1
+      }
+      item.price = item.priceArr[nextIndex].price
+      item.price_type = item.priceArr[nextIndex].type
+    },
+    getPriceArr(item: any) {
+      return [
+        // { name: '成本价', price: (item && item.cost_price) || 0 },
+        { name: '零售价', type: 1, price: (item && item.price) || 0 },
+        { name: '线上价', type: 2, price: (item && item.price_online) || 0 },
+        { name: '线下价', type: 3, price: (item && item.price_offline) || 0 }
+      ]
+    },
     openPrint(type: 1 | 2, itemInfo: any) {
       window.open(
         `/print/printSkuByPro/${itemInfo.sku_id}/${itemInfo.number || 1}/${itemInfo.product_id}?printType=${type}`
@@ -504,6 +541,8 @@ export default Vue.extend({
           item.price = finded.cost_price
         } else if (finded && storeInfo.type === 2) {
           item.price = finded.price
+          item.price_type = 1
+          item.priceArr = this.getPriceArr(finded)
         }
       }
       if (!item.sku_code) {
@@ -643,6 +682,13 @@ export default Vue.extend({
       }
     },
     getStoreInfo(skus: SkuInfo[], sku: SkuInfo, type: 1 | 2, productId?: number | string): void {
+      let obj = {}
+      if (type === 2) {
+        obj = {
+          price_type: 1,
+          priceArr: this.getPriceArr(sku)
+        }
+      }
       this.store_info = {
         skuArr: skus,
         product_id: productId,
@@ -659,7 +705,8 @@ export default Vue.extend({
             client_name: '',
             type: '', // 1入库，2出库
             order_id: '',
-            desc: ''
+            desc: '',
+            ...obj
           }
         ]
       }
@@ -692,15 +739,24 @@ export default Vue.extend({
         if (!itemM.price) {
           flag.price = false
         }
+        let obj = {}
+        if (this.store_info.type === 2) {
+          // 是否存在price_type
+          obj = {
+            price_type: itemM.price_type
+          }
+        }
         return {
           sku_code: itemM.sku_code,
           number: itemM.number,
           stock_id: this.store_info.type === 1 ? this.store_info.go_store_id : itemM.stock_id,
           price: itemM.price,
+          price_type: itemM.price_type,
           client_name: this.store_info.out_client_name || '',
           type: this.store_info.type,
           order_id: '',
-          desc: this.store_info.desc
+          desc: this.store_info.desc,
+          ...obj
         }
       })
       if (this.store_info.type === 1) {
@@ -882,6 +938,20 @@ export default Vue.extend({
       this.client_list = res[1].data.data
       this.user_list = res[2].data.data
     })
+  },
+  filters: {
+    filterPriceType(item: number) {
+      switch (item) {
+        case 1:
+          return '零售价'
+        case 2:
+          return '线上价'
+        case 3:
+          return '线下价'
+        default:
+          return '-'
+      }
+    }
   }
 })
 </script>

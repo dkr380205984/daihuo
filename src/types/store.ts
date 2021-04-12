@@ -9,6 +9,8 @@ export interface SkuStoreSave {
   price: number | string
   client_name?: string
   desc: string
+  price_type?: 1 | 2 | 3 // 1零售价2线上价3线下价
+  priceArr?: Array<{ name: string, price: number }>
 }
 
 export interface StoreInfo {

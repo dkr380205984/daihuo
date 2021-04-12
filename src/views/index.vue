@@ -5,7 +5,8 @@
       <div class="navMain">
         <div class="clientInfo">
           <div class="icon">
-            <img src="../assets/image/index/图标.jpg" />
+            <img src="../assets/image/index/图标.jpg"
+              style="width:100%;height:100%" />
           </div>
           <div class="sampleName">中国围巾城</div>
           <div class="allName">China Scarf City</div>

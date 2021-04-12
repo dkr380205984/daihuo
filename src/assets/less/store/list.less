@@ -32,3 +32,40 @@
     overflow: auto;
   }
 }
+.cutPriceOut{
+  position: relative;
+  .cutPriceCom{
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(100%,-50%);
+    width: 5em;
+    height: 24px;
+    user-select: none;
+    .top,
+    .bottom{
+      position: absolute;
+      left: 50%;
+      cursor: pointer;
+      &:hover{
+        color: @blue;
+      }
+    }
+    .top{
+      top: 0;
+      transform: translate(-50%,-100%);
+    }
+    .bottom{
+      bottom: 0;
+      transform: translate(-50%,100%);
+    }
+    .show{
+      line-height: 24px;
+      text-align: center;
+      display: none;
+      &.active{
+        display: block;
+      }
+    }
+  }
+}
