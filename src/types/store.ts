@@ -26,4 +26,5 @@ export interface StoreInfo {
   user_name?: string
   create_time?: string
   checked?: boolean
+  client_id?: string | number // 添加供货商仓库时需要供货商id
 }

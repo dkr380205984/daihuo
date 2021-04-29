@@ -68,11 +68,16 @@ export default Vue.extend({
           icon: 'iconchanpinguanli'
         },
         {
-          name: '库存管理',
+          name: '平台库存管理',
           url: '/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0',
           // icon: require('@/assets/image/index/库存管理.png')
           // iconFontName: 'iconkucunguanli',
           icon: 'iconkucunguanli'
+        },
+        {
+          name: '供货商库存管理',
+          url: '/supplierStore/list',
+          icon: 'icongonghuoshangkucun'
         },
         {
           name: '出入库日志',
@@ -148,10 +153,15 @@ export default Vue.extend({
           icon: 'iconchanpinguanli'
         },
         {
-          name: '库存管理',
+          name: '平台库存管理',
           url: '/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0',
           // icon: require('@/assets/image/index/库存管理.png')
           // iconFontName: 'iconkucunguanli',
+          icon: 'iconkucunguanli'
+        },
+        {
+          name: '供货商库存管理',
+          url: '/supplierStore/list',
           icon: 'iconkucunguanli'
         },
         {
@@ -219,6 +229,11 @@ export default Vue.extend({
             // icon: require('@/assets/image/index/产品管理.png')
             // iconFontName: 'iconchanpinguanli',
             icon: 'iconchanpinguanli'
+          },
+          {
+            name: '供货商库存管理',
+            url: '/supplierStore/list',
+            icon: 'iconkucunguanli'
           }
         ]
       }
