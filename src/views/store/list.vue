@@ -4,6 +4,10 @@
     v-loading="loading">
     <div class="header">
       <div class="title">库存列表</div>
+      <div class="btnCtn">
+        <div class="btn btnBlue"
+          @click="exportStoreData">导出库存数据</div>
+      </div>
     </div>
     <div class="filterCtn">
       <span class="label">筛选</span>
@@ -503,6 +507,16 @@ export default Vue.extend({
     }
   },
   methods: {
+    exportStoreData() {
+      if (this.$submitLock('正在导出，请勿频繁点击。', 2000)) {
+        return
+      }
+      store.exportStore().then((res) => {
+        if (res.data.status !== false) {
+          window.open(res.data.data)
+        }
+      })
+    },
     changePriceType(item: any, type: 1 | -1) {
       const nowIndex = item.priceArr.findIndex((itemF: any) => itemF.type === item.price_type)
       if (nowIndex === -1) {

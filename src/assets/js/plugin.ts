@@ -249,6 +249,22 @@ const plugin = {
     aLink.click()
   }
 }
+
+const submitLock = () => {
+  let lock = true
+  const Message = require('element-ui')
+  return (messageStr = '请勿频繁点击', timer = 1000) => { // 采用闭包保存lock状态
+    if (!lock) {
+      const str = messageStr
+      Message.Message.warning(str)
+      return true
+    }
+    lock = false
+    setTimeout(() => {
+      lock = true
+    }, timer)
+  }
+}
 export default {
   install: (Vue: any) => {
     Vue.prototype.$getHash = plugin.getHash
@@ -258,5 +274,6 @@ export default {
     Vue.prototype.$diffDate = plugin.diffDate
     Vue.prototype.$getDate = plugin.getDate
     Vue.prototype.$downloadExcel = plugin.downloadExcel
+    Vue.prototype.$submitLock = submitLock()
   }
 }
