@@ -876,10 +876,6 @@ export default Vue.extend({
           label: '平台帐号'
         },
         {
-          value: 2,
-          label: '运营帐号'
-        },
-        {
           value: 4,
           label: '供货商帐号'
         }
