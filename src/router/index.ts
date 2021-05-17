@@ -72,6 +72,22 @@ const routes: RouteConfig[] = [{
     component: () => import('../views/setting/sendMsg.vue')
   }]
 }, {
+  path: '/supplierStore',
+  redirect: '/supplierStore/list',
+  name: 'supplierStore',
+  component: () => import('@/views/index.vue'),
+  children: [
+    {
+      path: 'list',
+      name: 'supplierStoreList',
+      component: () => import('@/views/supplierStore/list.vue')
+    }, {
+      path: 'detail/:id',
+      name: 'supplierStoreDetail',
+      component: () => import('@/views/supplierStore/detail.vue')
+    }
+  ]
+}, {
   path: '/print/printSku/:id/:date',
   name: 'printSku',
   component: () => import('../views/print/printSku.vue')

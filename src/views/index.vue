@@ -5,7 +5,8 @@
       <div class="navMain">
         <div class="clientInfo">
           <div class="icon">
-            <img src="../assets/image/index/图标.jpg" />
+            <img src="../assets/image/index/图标.jpg"
+              style="width:100%;height:100%" />
           </div>
           <div class="sampleName">中国围巾城</div>
           <div class="allName">China Scarf City</div>
@@ -67,11 +68,16 @@ export default Vue.extend({
           icon: 'iconchanpinguanli'
         },
         {
-          name: '库存管理',
+          name: '平台库存管理',
           url: '/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0',
           // icon: require('@/assets/image/index/库存管理.png')
           // iconFontName: 'iconkucunguanli',
           icon: 'iconkucunguanli'
+        },
+        {
+          name: '供货商库存管理',
+          url: '/supplierStore/list',
+          icon: 'icongonghuoshangkucun'
         },
         {
           name: '出入库日志',
@@ -147,10 +153,15 @@ export default Vue.extend({
           icon: 'iconchanpinguanli'
         },
         {
-          name: '库存管理',
+          name: '平台库存管理',
           url: '/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0',
           // icon: require('@/assets/image/index/库存管理.png')
           // iconFontName: 'iconkucunguanli',
+          icon: 'iconkucunguanli'
+        },
+        {
+          name: '供货商库存管理',
+          url: '/supplierStore/list',
           icon: 'iconkucunguanli'
         },
         {
@@ -218,6 +229,11 @@ export default Vue.extend({
             // icon: require('@/assets/image/index/产品管理.png')
             // iconFontName: 'iconchanpinguanli',
             icon: 'iconchanpinguanli'
+          },
+          {
+            name: '供货商库存管理',
+            url: '/supplierStore/list',
+            icon: 'iconkucunguanli'
           }
         ]
       }

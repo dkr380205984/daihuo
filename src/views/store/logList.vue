@@ -13,7 +13,7 @@
     <div class="filterCtn">
       <span class="label">筛选</span>
       <div class="elCtn"
-        style="width:150px">
+        style="width:120px">
         <el-select v-model="search_type"
           placeholder="选择搜索类型"
           @change="changeRouter(1)">
@@ -24,13 +24,13 @@
         </el-select>
       </div>
       <div class="elCtn"
-        style="width:150px">
+        style="width:120px">
         <el-input v-model="keyword"
           placeholder="按回车搜索"
           @change="changeRouter(1)"></el-input>
       </div>
       <div class="elCtn"
-        style="width:150px">
+        style="width:120px">
         <el-select v-model="type"
           placeholder="操作类型"
           @change="changeRouter(1)">
@@ -43,7 +43,7 @@
         </el-select>
       </div>
       <div class="elCtn"
-        style="width:150px">
+        style="width:120px">
         <el-select v-model="source"
           placeholder="操作类型"
           @change="changeRouter(1)">
@@ -56,7 +56,7 @@
         </el-select>
       </div>
       <div class="elCtn"
-        style="width:150px">
+        style="width:120px">
         <el-select v-model="store_id"
           placeholder="筛选仓库"
           clearable
@@ -65,6 +65,21 @@
             :key="item.id"
             :value="item.id"
             :label="item.name"></el-option>
+        </el-select>
+      </div>
+      <div class="elCtn"
+        style="width:120px">
+        <el-select v-model="price_type"
+          clearable
+          :disabled='type !== 2'
+          placeholder="单价类型"
+          @change="changeRouter(1)">
+          <el-option :value="1"
+            label="零售价"></el-option>
+          <el-option :value="2"
+            label="线上价"></el-option>
+          <el-option :value="3"
+            label="线下价"></el-option>
         </el-select>
       </div>
       <div class="elCtn"
@@ -132,6 +147,13 @@
         <el-table-column label="数量"
           prop="number"
           width="120">
+        </el-table-column>
+        <el-table-column label="单价类型"
+          prop="price_type"
+          width="120">
+          <template scope="item">
+            <div style="overflow:hidden;white-space:nowrap;text-overflow: ellipsis;">{{item.row.price_type === 1 ? '零售价' :item.row.price_type === 2 ? '线上价' : item.row.price_type === 3 ? '线下价' : '-'}}</div>
+          </template>
         </el-table-column>
         <el-table-column label="单价(元)"
           prop="price"
@@ -206,6 +228,7 @@ export default Vue.extend({
       store_id: '',
       keyword: '',
       type: 1,
+      price_type: '',
       list: [],
       selectList: [],
       date: [],
@@ -303,7 +326,8 @@ export default Vue.extend({
           name: this.search_type === 0 ? this.keyword : '',
           type: this.type,
           start_time: this.date && this.date.length > 0 ? this.date[0] : '',
-          end_time: this.date && this.date.length > 0 ? this.date[1] : ''
+          end_time: this.date && this.date.length > 0 ? this.date[1] : '',
+          price_type: this.price_type || null
         })
         .then((res) => {
           this.list = res.data.data.items
@@ -349,7 +373,9 @@ export default Vue.extend({
           '&&store_id=' +
           this.store_id +
           '&&data_source=' +
-          this.source
+          this.source +
+          '&&priceType=' +
+          ((this.type === 2 && this.price_type) || '')
       )
     },
     deleteLog(id: number): void {
@@ -383,6 +409,7 @@ export default Vue.extend({
       this.pages = Number(params.page) || 1
       this.keyword = params.keyword
       this.type = (params.type && Number(params.type)) || 0
+      this.price_type = (this.type === 2 && +params.priceType) || ''
       this.store_id = params.store_id && Number(params.store_id)
       this.search_type = params.search_type && Number(params.search_type)
       this.source = params.data_source

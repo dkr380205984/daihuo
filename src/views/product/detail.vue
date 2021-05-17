@@ -421,16 +421,23 @@ export default Vue.extend({
       this.table_data.render_content = data.sku_info.map((item) => {
         const obj = JSON.parse(item.sku_info)
         const sku = 'sku编码'
+        const onlinePrice = '线上价'
+        const offlinePrice = '线下价'
         obj[sku] = item.sku_code
+        if (!obj[onlinePrice]) {
+          obj[onlinePrice] = item.price_online
+        }
+        if (!obj[offlinePrice]) {
+          obj[offlinePrice] = item.price_offline
+        }
         return obj
       })
-      for (const key of Object.keys(this.table_data.render_content[0])) {
-        if (key === 'sku编码') {
-          this.table_data.header.unshift(key)
-        } else {
-          this.table_data.header.push(key)
-        }
-      }
+      const sortRule = ['sku编码', '配色', '图片', '零售价', '成本价', '线上价', '线下价'].reverse()
+      this.table_data.header = Object.keys(this.table_data.render_content[0])
+        .sort((last: string, next: string) => {
+          return sortRule.indexOf(last) - sortRule.indexOf(next)
+        })
+        .reverse()
       this.collect_data = data.collect_data
       this.collect_data.newList = data.collect_data.list.slice(0, 4)
       this.order_data = data.order_data

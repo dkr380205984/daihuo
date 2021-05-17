@@ -9,6 +9,8 @@ export interface SkuStoreSave {
   price: number | string
   client_name?: string
   desc: string
+  price_type?: 1 | 2 | 3 // 1零售价2线上价3线下价
+  priceArr?: Array<{ name: string, price: number }>
 }
 
 export interface StoreInfo {
@@ -24,4 +26,5 @@ export interface StoreInfo {
   user_name?: string
   create_time?: string
   checked?: boolean
+  client_id?: string | number // 添加供货商仓库时需要供货商id
 }

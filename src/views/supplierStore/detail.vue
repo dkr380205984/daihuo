@@ -1,155 +1,186 @@
 <template>
-  <div id="storeList"
-    class="listCtnNoRepeat"
+  <div id="supplierDetail"
     v-loading="loading">
-    <div class="header">
-      <div class="title">库存列表</div>
-      <div class="btnCtn">
-        <div class="btn btnBlue"
-          @click="exportStoreData">导出库存数据</div>
+    <div class="detailCtnNoRepeat">
+      <div class="header">
+        <div class="title">供货商库存详情</div>
       </div>
-    </div>
-    <div class="filterCtn">
-      <span class="label">筛选</span>
-      <div class="elCtn"
-        style="width:150px">
-        <el-select v-model="search_type"
-          placeholder="选择搜索类型"
-          @change="changeRouter(1)">
-          <el-option v-for="item in search_type_list"
-            :key="item.value"
-            :value="item.value"
-            :label="item.name"></el-option>
-        </el-select>
-      </div>
-      <div class="elCtn">
-        <el-input v-model="keyword"
-          placeholder="输入信息按回车搜索"
-          @change="changeRouter(1)"></el-input>
-      </div>
-      <div class="elCtn"
-        style="width:150px">
-        <el-select v-model="client_id"
-          placeholder="搜索供货单位"
-          @change="changeRouter(1)"
-          clearable>
-          <el-option v-for="item in client_list"
-            :key="item.id"
-            :value="item.id"
-            :label="item.name"></el-option>
-        </el-select>
-      </div>
-      <div class="elCtn"
-        style="width:150px">
-        <el-select v-model="user_id"
-          placeholder="搜索创建人"
-          @change="changeRouter(1)"
-          clearable>
-          <el-option v-for="item in user_list"
-            :key="item.id"
-            :value="item.id"
-            :label="item.name"></el-option>
-        </el-select>
-      </div>
-      <div class="elCtn">
-        <el-date-picker @change="changeRouter(1)"
-          v-model="date"
-          style="width:290px"
-          class="filter_item"
-          type="daterange"
-          align="right"
-          unlink-panels
-          value-format="yyyy-MM-dd"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
-        </el-date-picker>
-      </div>
-      <div class="btnCtn">
-        <div class="btn btnGray"
-          @click="reset">重置</div>
-      </div>
-    </div>
-    <div class="content">
-      <div class="tableCtn">
-        <div class="thead">
-          <div class="trowCtn">
-            <div class="trow">
-              <div class="tcolumn">产品编号</div>
-              <div class="tcolumn">产品名称</div>
-              <div class="tcolumn">产品图片</div>
-              <div class="tcolumn">供货单位</div>
-              <div class="tcolumn">库存数</div>
-              <div class="tcolumn">创建时间</div>
-              <div class="tcolumn">操作</div>
-            </div>
+      <div class="moduleCtn"
+        style="padding-bottom:0">
+        <div class="module">
+          <div class="titleCtn">
+            <div class="title">仓库信息</div>
           </div>
-        </div>
-        <div class="tbody">
-          <div class="trowCtn"
-            v-for="item in list"
-            :key="item.id">
-            <div class="trow">
-              <div class="tcolumn">
-                <span class="text"><i class="icon"
-                    :class="{'el-icon-arrow-right':!item.show,'el-icon-arrow-down':item.show}"
-                    @click="item.show=!item.show;$forceUpdate()"></i>{{item.product_code}}</span>
-              </div>
-              <div class="tcolumn">{{item.name}}</div>
-              <div class="tcolumn">
-                <zh-img-list :list="item.images"></zh-img-list>
-              </div>
-              <div class="tcolumn">{{item.client_name || '暂无'}}</div>
-              <div class="tcolumn"
-                :class="{'orange':item.store===0,'green':item.store>0}">{{item.store}}</div>
-              <div class="tcolumn">{{item.create_time.substring(0,10)}}</div>
-              <div class="tcolumn flexRow">
-                <span class="opr blue"
-                  @click="item.show=!item.show;$forceUpdate()">{{item.show?'收起':'展开'}}</span>
-                <span class="opr orange"
-                  @click="getLog(item.id,1)">查看日志</span>
+          <div class="contentCtn">
+            <div class="rowCtn">
+              <div class="colCtn flex3">
+                <div class="label">仓库名称：</div>
+                <div class="text blue">{{storeInfo.name}}</div>
               </div>
             </div>
-            <div class="detailInfo"
-              v-show="item.show">
-              <el-table :data="item.sku_info"
-                style="width: 100%">
-                <el-table-column v-for="(itemHeader,indexHeader) in item.header"
-                  :key="indexHeader"
-                  :fixed="itemHeader==='零售价'|| itemHeader==='成本价'|| itemHeader==='sku编码'||itemHeader==='库存数'||itemHeader==='图片'?'left':itemHeader==='操作'?'right':false"
-                  :prop="filterName(itemHeader)"
-                  :label="itemHeader"
-                  :width="filterWidth(itemHeader)">
-                  <template scope="scope">
-                    <span :class="`text ${itemHeader === '库存数' && 'green' || ''}`"
-                      v-if="itemHeader!=='图片' && itemHeader!=='操作'">{{scope.row[filterName(itemHeader)]}}</span>
-                    <div class="image"
-                      v-if="itemHeader==='图片'"><img :src="scope.row.image_url || require('@/assets/image/noPic.jpg')" /></div>
-                    <div class="oprCtn"
-                      v-if="itemHeader==='操作'"
-                      style="width:140px">
-                      <span class="opr orange"
-                        @click="getStoreInfo(item.sku_info,scope.row,1,item.id)">入库</span>
-                      <span class="opr green"
-                        @click="getStoreInfo(item.sku_info,scope.row,2)">出库</span>
-                      <span class="opr blue"
-                        @click="getLog(scope.row.sku_code,2)">库存</span>
-                    </div>
-                  </template>
-                </el-table-column>
-              </el-table>
+            <div class="rowCtn">
+              <div class="colCtn flex3">
+                <div class="label">所属供货商：</div>
+                <div class="text">{{storeInfo.client_name}}</div>
+              </div>
+              <!-- <div class="colCtn flex3">
+                <div class="label">仓库管理员：</div>
+                <div class="text">{{'没给'}}</div>
+              </div> -->
+              <div class="colCtn flex3">
+                <div class="label">创建日期：</div>
+                <div class="text">{{$getDate(storeInfo.created_at,true)}}</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
     </div>
-    <div class="pageCtn">
-      <el-pagination background
-        :current-page.sync="page"
-        :page-size="10"
-        layout="prev, pager, next"
-        :total="total">
-      </el-pagination>
+    <div class="listCtnNoRepeat">
+      <div class="filterCtn">
+        <span class="label">筛选</span>
+        <div class="elCtn"
+          style="width:150px">
+          <el-select v-model="search_type"
+            placeholder="选择搜索类型"
+            @change="changeRouter(1)">
+            <el-option v-for="item in search_type_list"
+              :key="item.value"
+              :value="item.value"
+              :label="item.name"></el-option>
+          </el-select>
+        </div>
+        <div class="elCtn">
+          <el-input v-model="keyword"
+            placeholder="输入信息按回车搜索"
+            @change="changeRouter(1)"></el-input>
+        </div>
+        <div class="elCtn"
+          style="width:150px"
+          v-if="accountType !== 4">
+          <el-select v-model="client_id"
+            placeholder="搜索供货单位"
+            @change="accountType !== 4 && changeRouter(1)"
+            clearable>
+            <el-option v-for="item in client_list"
+              :key="item.id"
+              :value="item.id"
+              :label="item.name"></el-option>
+          </el-select>
+        </div>
+        <div class="elCtn"
+          style="width:150px">
+          <el-select v-model="user_id"
+            placeholder="搜索创建人"
+            @change="changeRouter(1)"
+            clearable>
+            <el-option v-for="item in user_list"
+              :key="item.id"
+              :value="item.id"
+              :label="item.name"></el-option>
+          </el-select>
+        </div>
+        <div class="elCtn">
+          <el-date-picker @change="changeRouter(1)"
+            v-model="date"
+            style="width:290px"
+            class="filter_item"
+            type="daterange"
+            align="right"
+            unlink-panels
+            value-format="yyyy-MM-dd"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期">
+          </el-date-picker>
+        </div>
+        <div class="btnCtn">
+          <div class="btn btnGray"
+            @click="reset">重置</div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="tableCtn">
+          <div class="thead">
+            <div class="trowCtn">
+              <div class="trow">
+                <div class="tcolumn">产品编号</div>
+                <div class="tcolumn">产品名称</div>
+                <div class="tcolumn">产品图片</div>
+                <div class="tcolumn"
+                  v-if="accountType !== 4">供货单位</div>
+                <div class="tcolumn">库存数</div>
+                <div class="tcolumn">创建时间</div>
+                <div class="tcolumn">操作</div>
+              </div>
+            </div>
+          </div>
+          <div class="tbody">
+            <div class="trowCtn"
+              v-for="item in list"
+              :key="item.id">
+              <div class="trow">
+                <div class="tcolumn">
+                  <span class="text"><i class="icon"
+                      :class="{'el-icon-arrow-right':!item.show,'el-icon-arrow-down':item.show}"
+                      @click="item.show=!item.show;$forceUpdate()"></i>{{item.product_code}}</span>
+                </div>
+                <div class="tcolumn">{{item.name}}</div>
+                <div class="tcolumn">
+                  <zh-img-list :list="item.images"></zh-img-list>
+                </div>
+                <div class="tcolumn"
+                  v-if="accountType !== 4"> {{item.client_name || '暂无'}}</div>
+                <div class="tcolumn"
+                  :class="{'orange':item.store===0,'green':item.store>0}">{{item.store}}</div>
+                <div class="tcolumn">{{item.create_time.substring(0,10)}}</div>
+                <div class="tcolumn flexRow">
+                  <span class="opr blue"
+                    @click="item.show=!item.show;$forceUpdate()">{{item.show?'收起':'展开'}}</span>
+                  <span class="opr orange"
+                    @click="getLog(item.id,1)">查看日志</span>
+                </div>
+              </div>
+              <div class="detailInfo"
+                v-show="item.show">
+                <el-table :data="item.sku_info"
+                  style="width: 100%">
+                  <el-table-column v-for="(itemHeader,indexHeader) in item.header"
+                    :key="indexHeader"
+                    :fixed="itemHeader==='零售价'|| itemHeader==='成本价'|| itemHeader==='sku编码'||itemHeader==='库存数'||itemHeader==='图片'?'left':itemHeader==='操作'?'right':false"
+                    :prop="filterName(itemHeader)"
+                    :label="itemHeader"
+                    :width="filterWidth(itemHeader)">
+                    <template scope="scope">
+                      <span :class="`text ${itemHeader === '库存数' && 'green' || ''}`"
+                        v-if="itemHeader!=='图片' && itemHeader!=='操作'">{{scope.row[filterName(itemHeader)]}}</span>
+                      <div class="image"
+                        v-if="itemHeader==='图片'"><img :src="scope.row.image_url || require('@/assets/image/noPic.jpg')" /></div>
+                      <div class="oprCtn"
+                        v-if="itemHeader==='操作'"
+                        style="width:140px">
+                        <span class="opr orange"
+                          @click="getStoreInfo(item.sku_info,scope.row,1,item.id)">入库</span>
+                        <span class="opr green"
+                          @click="getStoreInfo(item.sku_info,scope.row,2)">出库</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pageCtn">
+        <el-pagination background
+          :current-page.sync="pages"
+          :page-size="limit"
+          layout="prev, pager, next"
+          :total="total">
+        </el-pagination>
+      </div>
     </div>
     <div class="popup"
       v-show="store_flag">
@@ -335,15 +366,15 @@
           <div class="boxCtn">
             <div class="box">
               <span class="label">出库数</span>
-              <span class="number green">{{log_sts.outNum}}</span>
+              <span class="number green">{{outLogNum}}</span>
             </div>
             <div class="box">
               <span class="label">入库数</span>
-              <span class="number orange">{{log_sts.inNum}}</span>
+              <span class="number orange">{{inLogNum}}</span>
             </div>
             <div class="box">
               <span class="label">库存量</span>
-              <span class="number blue">{{log_sts.inNum - log_sts.outNum}}</span>
+              <span class="number blue">{{inLogNum - outLogNum}}</span>
             </div>
           </div>
           <div class="detailInfo">
@@ -396,36 +427,6 @@
         </div>
       </div>
     </div>
-    <div class="popup"
-      v-show="sku_flag">
-      <div class="main">
-        <div class="title">
-          <div class="text">库存详情</div>
-          <i class="el-icon-close"
-            @click="sku_flag=false"></i>
-        </div>
-        <div class="content">
-          <div class="tableCtn">
-            <div class="normalTb">
-              <div class="thead">
-                <div class="trow">
-                  <div class="tcolumn">仓库名称</div>
-                  <div class="tcolumn">总库存</div>
-                </div>
-              </div>
-              <div class="tbody">
-                <div class="trow"
-                  v-for="item in sku_list"
-                  :key="item.id">
-                  <div class="tcolumn">{{item.stock_name}}</div>
-                  <div class="tcolumn">{{item.total}}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -450,6 +451,32 @@ export default Vue.extend({
   } {
     return {
       loading: true,
+      storeInfo: {},
+      search_type: 0,
+      search_type_list: [
+        {
+          value: 0,
+          name: '产品名称'
+        },
+        {
+          value: 1,
+          name: '产品编号'
+        },
+        {
+          value: 2,
+          name: 'sku编码'
+        }
+      ],
+      keyword: '',
+      client_id: '',
+      client_list: [],
+      user_id: '',
+      user_list: [],
+      date: '',
+      list: [],
+      pages: 1,
+      limit: 10,
+      total: 1,
       store_info: {
         skuArr: [],
         desc: '',
@@ -471,52 +498,13 @@ export default Vue.extend({
       },
       store_flag: false,
       store_arr: [],
-      search_type: 0,
-      search_type_list: [
-        {
-          value: 0,
-          name: '产品名称'
-        },
-        {
-          value: 1,
-          name: '产品编号'
-        },
-        {
-          value: 2,
-          name: 'sku编码'
-        }
-      ],
-      client_id: '',
-      client_list: [],
-      user_id: '0',
-      user_list: [],
-      keyword: '',
-      page: 1,
-      total: 1,
       log_flag: false,
       log_list: [],
-      log_sts: {
-        inNum: 0,
-        outNum: 0
-      },
-      sku_flag: false,
       sku_list: [],
-      list: [],
-      date: [],
       goStoreAfterInfo: []
     }
   },
   methods: {
-    exportStoreData() {
-      if (this.$submitLock('正在导出，请勿频繁点击。', 2000)) {
-        return
-      }
-      store.exportStore().then((res) => {
-        if (res.data.status !== false) {
-          window.open(res.data.data)
-        }
-      })
-    },
     changePriceType(item: any, type: 1 | -1) {
       const nowIndex = item.priceArr.findIndex((itemF: any) => itemF.type === item.price_type)
       if (nowIndex === -1) {
@@ -601,41 +589,8 @@ export default Vue.extend({
       data.splice(index, 1)
     },
     querySearchOutClient(queryString: string, callback: (returnArr: Array<{ value: string }>) => void) {
-      const list = JSON.parse(window.sessionStorage.getItem('outStoreClient') || JSON.stringify([]))
+      const list = JSON.parse(window.sessionStorage.getItem('outStoreClient_supplier') || JSON.stringify([]))
       callback(queryString ? list.filter((itemF: { value: string }) => itemF.value.indexOf(queryString)) : list)
-    },
-    reset() {
-      this.$router.push('/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0')
-    },
-    changeRouter(page: number | string) {
-      this.$router.push(
-        '/store/list/page=' +
-          (page || 1) +
-          '&&keyword=' +
-          this.keyword +
-          '&&date=' +
-          this.date +
-          '&&client_id=' +
-          this.client_id +
-          '&&user_id=' +
-          this.user_id +
-          '&&type=' +
-          this.search_type
-      )
-    },
-    // 更新筛选条件
-    getFilters() {
-      const params = this.$getHash(this.$route.params.params)
-      this.page = Number(params.page)
-      this.keyword = params.keyword
-      this.client_id = params.client_id && Number(params.client_id)
-      this.user_id = params.user_id && Number(params.user_id)
-      this.search_type = params.type && Number(params.type)
-      if (params.date !== 'null' && params.date !== '') {
-        this.date = params.date.split(',')
-      } else {
-        this.date = []
-      }
     },
     formAdapter(data: ProductForm[]): ProductForm[] {
       const selfData = this.$clone(data)
@@ -696,6 +651,10 @@ export default Vue.extend({
       }
     },
     getStoreInfo(skus: SkuInfo[], sku: SkuInfo, type: 1 | 2, productId?: number | string): void {
+      if (this.accountType !== 4) {
+        this.$message.warning('供应商仓库仅允许供货商自己操作')
+        return
+      }
       let obj = {}
       if (type === 2) {
         obj = {
@@ -821,93 +780,35 @@ export default Vue.extend({
           }
           if (this.store_info.type !== 1) {
             // 添加出库单位本地缓存
-            const list = JSON.parse(window.sessionStorage.getItem('outStoreClient') || JSON.stringify([]))
+            const list = JSON.parse(window.sessionStorage.getItem('outStoreClient_supplier') || JSON.stringify([]))
             list.push({
               value: this.store_info.out_client_name
             })
-            window.sessionStorage.setItem('outStoreClient', JSON.stringify(list))
+            window.sessionStorage.setItem('outStoreClient_supplier', JSON.stringify(list))
           }
           this.getList()
         }
       })
     },
-    getList(): void {
-      this.loading = true
-      product
-        .list({
-          page: this.page,
-          limit: 10,
-          product_code: this.search_type === 1 ? this.keyword : '',
-          sku_code: this.search_type === 2 ? this.keyword : '',
-          name: this.search_type === 0 ? this.keyword : '',
-          client_id: this.client_id,
-          user_id: this.user_id,
-          start_time: this.date && this.date.length > 0 ? this.date[0] : '',
-          end_time: this.date && this.date.length > 0 ? this.date[1] : '',
-          filter_client: true
-        })
-        .then((res) => {
-          if (res.data.data) {
-            this.list = this.formAdapter(res.data.data.items)
-            this.total = res.data.data.total
-            this.loading = false
-          }
-        })
-    },
-    getLog(id: number, type: number = 1): void {
+    getLog(id: number): void {
       this.loading = true
       store
         .skuLog({
-          stock_id: '',
-          product_id: type === 1 ? id : '',
-          sku_code: type === 2 ? id : ''
+          stock_id: this.$route.params.id,
+          product_id: id,
+          sku_code: '',
+          type: 2
         })
         .then((res) => {
           this.loading = false
-          if (type === 1) {
-            this.log_list = res.data.data
-            if (this.log_list.length > 0) {
-              this.stsLog()
-              this.log_flag = true
-            } else {
-              this.$message.warning('该产品暂无相关的出入库日志')
-            }
+          this.log_list = res.data.data
+          if (this.log_list.length > 0) {
+            this.stsLog()
+            this.log_flag = true
           } else {
-            if (res.data.data.length > 0) {
-              this.sku_list = this.$mergeData(res.data.data, {
-                mainRule: 'stock_id',
-                otherRule: [{ name: 'stock_name' }]
-              })
-              this.sku_list.forEach((item: any) => {
-                item.total = item.childrenMergeInfo.reduce((total: number, current: any) => {
-                  if (current.type === 1) {
-                    return total + current.number
-                  } else if (current.type === 2) {
-                    return total - current.number
-                  } else {
-                    return total
-                  }
-                }, 0)
-              })
-              this.sku_flag = true
-            } else {
-              this.$message.warning('该编码产品暂无相关的出入库日志')
-            }
+            this.$message.warning('该产品暂无相关的出入库日志')
           }
         })
-    },
-    // 日志统计
-    stsLog(): void {
-      this.log_sts.inNum = this.log_list
-        .filter((item: any) => item.type === 1)
-        .reduce((total: number, current: any) => {
-          return total + current.number
-        }, 0)
-      this.log_sts.outNum = this.log_list
-        .filter((item: any) => item.type === 2)
-        .reduce((total: number, current: any) => {
-          return total + current.number
-        }, 0)
     },
     deleteLog(id: number, index: number): void {
       this.$confirm('是否删除该出入库日志?', '提示', {
@@ -933,6 +834,64 @@ export default Vue.extend({
             message: '已取消删除'
           })
         })
+    },
+    getList(): void {
+      this.loading = true
+      product
+        .list({
+          page: this.page,
+          limit: 10,
+          product_code: this.search_type === 1 ? this.keyword : '',
+          sku_code: this.search_type === 2 ? this.keyword : '',
+          name: this.search_type === 0 ? this.keyword : '',
+          client_id: this.clientId,
+          user_id: this.user_id,
+          start_time: this.date && this.date.length > 0 ? this.date[0] : '',
+          end_time: this.date && this.date.length > 0 ? this.date[1] : '',
+          save_client_id: this.clientId,
+          stock_id: this.$route.params.id
+        })
+        .then((res) => {
+          if (res.data.data) {
+            this.list = this.formAdapter(res.data.data.items)
+            this.total = res.data.data.total
+            this.loading = false
+          }
+        })
+    },
+    reset() {
+      this.$router.replace(`/supplierStore/detail/${this.$route.params.id}`)
+    },
+    changeRouter(page: number | string) {
+      const nextFullPath =
+        '/supplierStore/detail/' +
+        this.$route.params.id +
+        '?pages=' +
+        page +
+        '&searchType=' +
+        this.search_type +
+        '&keyword=' +
+        this.keyword +
+        (this.accountType !== 4 ? '&clientId=' + this.client_id : '') +
+        '&userId=' +
+        this.user_id +
+        '&date=' +
+        this.date
+      this.$router.replace(nextFullPath)
+    },
+    // 更新筛选条件
+    getFilters() {
+      const params = this.$route.query
+      this.pages = Number(params.pages) || 1
+      this.search_type = (params.searchType && Number(params.searchType)) || 0
+      this.keyword = params.keyword || ''
+      this.client_id = (params.clientId && Number(params.clientId)) || ''
+      this.user_id = (params.userId && Number(params.userId)) || ''
+      if (params.date && params.date !== 'null' && params.date !== '') {
+        this.date = (params.date as string).split(',')
+      } else {
+        this.date = []
+      }
     }
   },
   watch: {
@@ -948,11 +907,34 @@ export default Vue.extend({
   created() {
     this.getFilters()
     this.getList()
-    Promise.all([store.list(), client.list(), user.list()]).then((res) => {
-      this.store_arr = res[0].data.data
-      this.client_list = res[1].data.data
-      this.user_list = res[2].data.data
-    })
+    if (this.accountType === 4) {
+      user.list().then((res) => {
+        this.user_list = res.data.data
+      })
+    } else {
+      Promise.all([
+        store.list({
+          client_id: this.clientId,
+          type: 2
+        }),
+        client.list(),
+        user.list()
+      ]).then((res) => {
+        this.store_arr = res[0].data.data
+        this.client_list = res[1].data.data
+        this.user_list = res[2].data.data
+      })
+    }
+    store
+      .list({
+        client_id: this.accountType === 4 ? this.clientId : null,
+        type: 2
+      })
+      .then((res) => {
+        if (res.data.status !== false) {
+          this.storeInfo = res.data.data.find((itemF: any) => +itemF.id === +this.$route.params.id)
+        }
+      })
   },
   filters: {
     filterPriceType(item: number) {
@@ -967,44 +949,36 @@ export default Vue.extend({
           return '-'
       }
     }
+  },
+  computed: {
+    accountType(): 1 | 2 | 3 | 4 {
+      return JSON.parse(window.localStorage.getItem('userInfo') as string).type
+    },
+    clientId(): number {
+      return this.accountType === 4
+        ? JSON.parse(window.localStorage.getItem('userInfo') as string).client_id
+        : this.client_id
+    },
+    inLogNum(): number {
+      return this.log_list
+        .filter((item: any) => item.type === 1)
+        .map((itemM: any) => +itemM.number || 0)
+        .reduce((total: number, current: any) => {
+          return total + current
+        }, 0)
+    },
+    outLogNum(): number {
+      return this.log_list
+        .filter((item: any) => item.type === 2)
+        .map((itemM: any) => +itemM.number || 0)
+        .reduce((total: number, current: any) => {
+          return total + current
+        }, 0)
+    }
   }
 })
 </script>
 
 <style lang="less" scoped>
-@import '~@/assets/less/store/list.less';
-</style>
-<style lang="less">
-#storeList {
-  .detailInfo {
-    .image {
-      padding: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      img {
-        width: 40px;
-        height: 40px;
-      }
-    }
-    .oprCtn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      .opr {
-        cursor: pointer;
-        padding: 0 8px;
-        border-right: 1px solid #e9e9e9;
-        height: 20px;
-        cursor: pointer;
-        &:nth-last-child(1) {
-          border-right: 0;
-        }
-        &:nth-child(1) {
-          padding-left: 0;
-        }
-      }
-    }
-  }
-}
+@import '~@/assets/less/supplierStore/detail.less';
 </style>

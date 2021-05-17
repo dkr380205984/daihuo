@@ -195,10 +195,17 @@ const plugin = {
       }
     }
   },
-  getDate(date: Date): string {
-    const year = date.getFullYear()
-    const month = date.getMonth() + 1
-    const day = date.getDate()
+  /**
+   * @param isStringDate 2021-04-14新增 为不影响前期功能 用于判断是否需要new Date 默认false
+   */
+  getDate(date: Date, isStringDate: boolean = false): string {
+    let argDate = date
+    if (isStringDate) {
+      argDate = new Date(date)
+    }
+    const year = argDate.getFullYear()
+    const month = argDate.getMonth() + 1
+    const day = argDate.getDate()
     return year + '-' + (month < 10 ? ('0' + month) : month) + '-' + (day < 10 ? ('0' + day) : day)
   },
   downloadExcel(data: any[], mapTitle: MapTitle[], excelName: string) {
@@ -242,6 +249,22 @@ const plugin = {
     aLink.click()
   }
 }
+
+const submitLock = () => {
+  let lock = true
+  const Message = require('element-ui')
+  return (messageStr = '请勿频繁点击', timer = 1000) => { // 采用闭包保存lock状态
+    if (!lock) {
+      const str = messageStr
+      Message.Message.warning(str)
+      return true
+    }
+    lock = false
+    setTimeout(() => {
+      lock = true
+    }, timer)
+  }
+}
 export default {
   install: (Vue: any) => {
     Vue.prototype.$getHash = plugin.getHash
@@ -251,5 +274,6 @@ export default {
     Vue.prototype.$diffDate = plugin.diffDate
     Vue.prototype.$getDate = plugin.getDate
     Vue.prototype.$downloadExcel = plugin.downloadExcel
+    Vue.prototype.$submitLock = submitLock()
   }
 }

@@ -48,7 +48,9 @@ const store = {
   getLogById: (params: DetailParam) => http.get(`${baseUrl}/sku/store/log/detail`, params),
   storeSave: (params: StoreInfo) => http.post(`${baseUrl}/edit/store/save`, params, 'application/json'),
   skuSave: (params: { data: SkuStoreSave[] }) => http.post(`${baseUrl}/sku/store/save`, params, 'application/json'),
-  getSkuStoreNumber: (params: GetSkuStoreNumber) => http.get(`${baseUrl}/sku/store/number`, params)
+  getSkuStoreNumber: (params: GetSkuStoreNumber) => http.get(`${baseUrl}/sku/store/number`, params),
+  // 导出库存列表
+  exportStore: (params?: any) => http.get(`${baseUrl}/sku/store/export`, params)
 }
 
 // 单位

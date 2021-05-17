@@ -22,12 +22,15 @@
                 {{itemSelf}}
               </span>
             </div>
+            <div class="line">
+              <span>零售价：{{price || 'NAN'}}元</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <div v-else
-      style="display:inline-block">
+      style="display:inline-block;padding:30px 20px 30px 50px">
       <div class="codeCtn"
         style="page-break-after: always;"
         v-for="itemChild in number"
@@ -48,6 +51,9 @@
               {{itemSelf}}
             </span>
           </div>
+          <div class="line">
+            <span>价格：{{price || 'NAN'}}元</span>
+          </div>
         </div>
       </div>
     </div>
@@ -64,12 +70,14 @@ export default Vue.extend({
     sku_code: string
     product_name: string
     number: number
+    price: null | number
   } {
     return {
       sku_info: [],
       sku_code: '',
       product_name: '',
-      number: 0
+      number: 0,
+      price: null
     }
   },
   methods: {
@@ -106,11 +114,15 @@ export default Vue.extend({
       const storeNum = '库存数'
       const image = '图片'
       const sku = 'sku编码'
+      const onlinePrice = '线上价'
+      const offlinePrice = '线下价'
       delete skuInfoSelf[costPrice]
       delete skuInfoSelf[price]
       delete skuInfoSelf[storeNum]
       delete skuInfoSelf[image]
       delete skuInfoSelf[sku]
+      delete skuInfoSelf[onlinePrice]
+      delete skuInfoSelf[offlinePrice]
       deleteObj.forEach((item: string) => {
         delete skuInfoSelf[item]
       })
@@ -128,6 +140,7 @@ export default Vue.extend({
         const finded = res.data.data.sku_info.find((item: SkuInfo) => Number(item.id) === Number(this.$route.params.id))
         this.sku_code = finded.sku_code
         this.sku_info = this.getSkuName(finded.sku_info, res.data.data.category_info)
+        this.price = finded.price_online
         console.log(this.$route.params.number)
         this.$nextTick(() => {
           jsbarcode('.barcode')

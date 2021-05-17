@@ -221,7 +221,7 @@
                         <div class="tcolumn min120"
                           v-for="(item,index) in table_data.header"
                           :key="index"
-                          :style="(filterName(item.name)==='零售价'||filterName(item.name)==='成本价') && `min-width:160px` || ''">{{filterName(item.name)}}</div>
+                          :style="(filterName(item.name)==='零售价'||filterName(item.name)==='成本价'||filterName(item.name)==='线上价'||filterName(item.name)==='线下价') && `min-width:160px` || ''">{{filterName(item.name)}}</div>
                       </div>
                     </div>
                     <div class="tbody">
@@ -229,7 +229,7 @@
                         v-for="(itemRow,indexRow) in table_data.render_content"
                         :key="indexRow">
                         <div class="tcolumn min120"
-                          :style="(item.name==='零售价'||item.name==='成本价') && `min-width:160px` || ''"
+                          :style="(item.name==='零售价'||item.name==='成本价'||item.name==='线上价'||item.name==='线下价') && `min-width:160px` || ''"
                           v-for="(item,index) in table_data.header"
                           :key="index">
                           <span v-if="item.firstName"
@@ -237,9 +237,9 @@
                           <el-input class="elDom"
                             v-if="!item.firstName && item.name!=='图片'"
                             v-model="itemRow[filterName(item.name)]"
-                            @input="$forceUpdate()"
+                            @input="inputEvent($event,item.name,itemRow,filterName(item.name))"
                             :placeholder="item.name">
-                            <template v-if="item.name==='零售价'||item.name==='成本价'"
+                            <template v-if="item.name==='零售价'||item.name==='成本价'||item.name==='线上价'||item.name==='线下价'"
                               slot="append">元</template>
                           </el-input>
                           <el-upload v-if="!item.firstName && item.name==='图片'"
@@ -315,6 +315,18 @@ export default Vue.extend({
     }
   },
   methods: {
+    inputEvent(e: any, name: any, item: any, itemName: any) {
+      if (name !== '零售价') {
+        this.$forceUpdate()
+        return
+      } else {
+        const onlinePrice = '线上价'
+        const offlinePrice = '线下价'
+        item[onlinePrice] = Math.ceil(item[itemName] / 0.38)
+        item[offlinePrice] = Math.ceil(item[itemName] / 0.45)
+        this.$forceUpdate()
+      }
+    },
     // 选取品类初始化数据
     renderDom(id: number): void {
       const finded: any = this.type_list.find((itemFind: { id: number; category_menu: string }) => itemFind.id === id)
@@ -391,6 +403,16 @@ export default Vue.extend({
             is_combine: false,
             is_required: true,
             name: '成本价'
+          },
+          {
+            is_combine: false,
+            is_required: true,
+            name: '线上价'
+          },
+          {
+            is_combine: false,
+            is_required: true,
+            name: '线下价'
           },
           {
             is_combine: false,
@@ -597,6 +619,8 @@ export default Vue.extend({
       const price = '零售价'
       const costPrice = '成本价'
       const image = '图片'
+      const onlinePrice = '线上价'
+      const offlinePrice = '线下价'
       const formData: ProductForm = {
         name: this.product_name,
         category_id: this.product_type,
@@ -613,6 +637,8 @@ export default Vue.extend({
               id: '',
               sku_id: index >= 9 ? index + 1 : '0' + (index + 1),
               price: item[price],
+              price_online: item[onlinePrice],
+              price_offline: item[offlinePrice],
               cost_price: item[costPrice],
               sku_info: JSON.stringify(item),
               image_url: item[image],
