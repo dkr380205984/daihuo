@@ -6,7 +6,11 @@
       <div class="title">库存列表</div>
       <div class="btnCtn">
         <div class="btn btnBlue"
-          @click="exportStoreData">导出库存数据</div>
+          @click="exportStoreData"
+          v-if="user_info.type===1">导出当前库存数据</div>
+        <div class="btn btnBlue"
+          @click="excel_flag=true"
+          v-if="user_info.type===1">查看导出列表</div>
       </div>
     </div>
     <div class="filterCtn">
@@ -29,7 +33,8 @@
       </div>
       <div class="elCtn"
         style="width:150px">
-        <el-select v-model="client_id"
+        <el-select v-if="user_info.type===1"
+          v-model="client_id"
           placeholder="搜索供货单位"
           @change="changeRouter(1)"
           clearable>
@@ -78,10 +83,12 @@
               <div class="tcolumn">产品编号</div>
               <div class="tcolumn">产品名称</div>
               <div class="tcolumn">产品图片</div>
-              <div class="tcolumn">供货单位</div>
+              <div class="tcolumn"
+                v-if="user_info.type===1">供货单位</div>
               <div class="tcolumn">库存数</div>
               <div class="tcolumn">创建时间</div>
-              <div class="tcolumn">操作</div>
+              <div class="tcolumn"
+                v-if="user_info.type===1">操作</div>
             </div>
           </div>
         </div>
@@ -91,19 +98,24 @@
             :key="item.id">
             <div class="trow">
               <div class="tcolumn">
-                <span class="text"><i class="icon"
+                <span class="text"
+                  v-if="user_info.type===1"><i class="icon"
                     :class="{'el-icon-arrow-right':!item.show,'el-icon-arrow-down':item.show}"
                     @click="item.show=!item.show;$forceUpdate()"></i>{{item.product_code}}</span>
+                <span class="text"
+                  v-if="user_info.type!==1">{{item.product_code}}</span>
               </div>
               <div class="tcolumn">{{item.name}}</div>
               <div class="tcolumn">
                 <zh-img-list :list="item.images"></zh-img-list>
               </div>
-              <div class="tcolumn">{{item.client_name || '暂无'}}</div>
+              <div class="tcolumn"
+                v-if="user_info.type===1">{{item.client_name || '暂无'}}</div>
               <div class="tcolumn"
                 :class="{'orange':item.store===0,'green':item.store>0}">{{item.store}}</div>
               <div class="tcolumn">{{item.create_time.substring(0,10)}}</div>
-              <div class="tcolumn flexRow">
+              <div class="tcolumn flexRow"
+                v-if="user_info.type===1">
                 <span class="opr blue"
                   @click="item.show=!item.show;$forceUpdate()">{{item.show?'收起':'展开'}}</span>
                 <span class="opr orange"
@@ -426,6 +438,45 @@
         </div>
       </div>
     </div>
+    <div class="popup"
+      v-show="excel_flag">
+      <div class="main">
+        <div class="title">
+          <div class="text">下载库存表格文件列表</div>
+          <i class="el-icon-close"></i>
+        </div>
+        <div class="content">
+          <div class="tableCtn">
+            <div class="normalTb">
+              <div class="thead">
+                <div class="trow">
+                  <div class="tcolumn">文件名称</div>
+                  <div class="tcolumn">更新时间</div>
+                  <div class="tcolumn">文件状态</div>
+                </div>
+              </div>
+              <div class="tbody">
+                <div class="trow"
+                  v-for="item in excel_list"
+                  :key="item.id">
+                  <div class="tcolumn">{{item.name}}</div>
+                  <div class="tcolumn">{{item.complete_time.slice(0,10)}}</div>
+                  <div class="tcolumn">
+                    <div style="cursor:pointer"
+                      :class="{'blue':item.status===2,'green':item.status===1,'red':item.status===3}"
+                      @click="downloadExcel(item)">{{item.status===1?'处理中':item.status===2?'点击下载':'导出失败'}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="opr">
+          <div class="btn btnBlue"
+            @click="excel_flag=false">确定</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -450,6 +501,8 @@ export default Vue.extend({
   } {
     return {
       loading: true,
+      excel_flag: false,
+      excel_list: [],
       store_info: {
         skuArr: [],
         desc: '',
@@ -503,19 +556,28 @@ export default Vue.extend({
       sku_list: [],
       list: [],
       date: [],
-      goStoreAfterInfo: []
+      goStoreAfterInfo: [],
+      user_info: JSON.parse(window.localStorage.getItem('userInfo') as string)
     }
   },
   methods: {
     exportStoreData() {
-      if (this.$submitLock('正在导出，请勿频繁点击。', 2000)) {
-        return
-      }
-      store.exportStore().then((res) => {
-        if (res.data.status !== false) {
-          window.open(res.data.data)
-        }
+      store.exportStoreBase64().then((res) => {
+        this.$message.success('正在导出数据，请等待数据返回')
+        store.exportStore().then((res2) => {
+          this.excel_list = res2.data.data
+          this.excel_flag = true
+        })
       })
+    },
+    downloadExcel(info: any) {
+      if (info.status === 2) {
+        window.open(info.url)
+      } else if (info.status === 1) {
+        this.$message.warning('请等待3-5分钟刷新页面查询结果')
+      } else {
+        this.$message.warning('导出失败，请重新导出')
+      }
     },
     changePriceType(item: any, type: 1 | -1) {
       const nowIndex = item.priceArr.findIndex((itemF: any) => itemF.type === item.price_type)
@@ -948,10 +1010,11 @@ export default Vue.extend({
   created() {
     this.getFilters()
     this.getList()
-    Promise.all([store.list(), client.list(), user.list()]).then((res) => {
+    Promise.all([store.list(), client.list(), user.list(), store.exportStore()]).then((res) => {
       this.store_arr = res[0].data.data
       this.client_list = res[1].data.data
       this.user_list = res[2].data.data
+      this.excel_list = res[3].data.data
     })
   },
   filters: {

@@ -140,7 +140,7 @@ export default Vue.extend({
         const finded = res.data.data.sku_info.find((item: SkuInfo) => Number(item.id) === Number(this.$route.params.id))
         this.sku_code = finded.sku_code
         this.sku_info = this.getSkuName(finded.sku_info, res.data.data.category_info)
-        this.price = finded.price_online
+        this.price = finded.price
         console.log(this.$route.params.number)
         this.$nextTick(() => {
           jsbarcode('.barcode')

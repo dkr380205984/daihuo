@@ -50,7 +50,8 @@ const store = {
   skuSave: (params: { data: SkuStoreSave[] }) => http.post(`${baseUrl}/sku/store/save`, params, 'application/json'),
   getSkuStoreNumber: (params: GetSkuStoreNumber) => http.get(`${baseUrl}/sku/store/number`, params),
   // 导出库存列表
-  exportStore: (params?: any) => http.get(`${baseUrl}/sku/store/export`, params)
+  exportStore: (params?: any) => http.get(`${baseUrl}/sku/store/export/list`, params),
+  exportStoreBase64: (params?: any) => http.get(`${baseUrl}/sku/store/export/queue  `, params)
 }
 
 // 单位

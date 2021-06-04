@@ -6,7 +6,8 @@
       <div class="title">产品列表</div>
       <div class="btnCtn">
         <div class="btn btnBlue"
-          @click="$router.push('/product/create')">添加产品</div>
+          @click="$router.push('/product/create')"
+          v-if="user_info.type===4||user_info.type===1">添加产品</div>
       </div>
     </div>
     <div class="filterCtn">
@@ -42,7 +43,7 @@
       </div>
       <div class="elCtn"
         style="width:120px"
-        v-if="show_client">
+        v-if="user_info.type===1">
         <el-select v-model="client_id"
           placeholder="供货单位"
           @change="changeRouter(1)"
@@ -95,7 +96,8 @@
                 style="flex:1.2">产品名称</div>
               <div class="tcolumn"
                 style="text-align:center">产品图片</div>
-              <div class="tcolumn">供货单位</div>
+              <div class="tcolumn"
+                v-if="user_info.type===1">供货单位</div>
               <div class="tcolumn">产品价格</div>
               <div class="tcolumn">创建人</div>
               <div class="tcolumn">创建时间</div>
@@ -138,7 +140,8 @@
               <div class="tcolumn">
                 <zh-img-list :list="item.images"></zh-img-list>
               </div>
-              <div class="tcolumn">{{item.client_name || '暂无'}}</div>
+              <div class="tcolumn"
+                v-if="user_info.type===1">{{item.client_name || '暂无'}}</div>
               <div class="tcolumn">
                 <span class="blue">{{item.min_price + '元 ~ ' + item.max_price + '元'}}</span>
               </div>
@@ -149,9 +152,11 @@
                 <span class="opr"
                   @click="$router.push('/product/detail/' + item.id)">详情</span>
                 <span class="opr orange"
-                  @click="$router.push('/product/update/' + item.id)">修改</span>
+                  @click="$router.push('/product/update/' + item.id)"
+                  v-if="user_info.type===4||user_info.type===1">修改</span>
                 <span class="opr red"
-                  @click="deletePro(item.id)">删除</span>
+                  @click="deletePro(item.id)"
+                  v-if="user_info.type===4||user_info.type===1">删除</span>
               </div>
             </div>
           </div>
@@ -177,7 +182,6 @@ export default Vue.extend({
     return {
       loading: true,
       search_type: 0,
-      show_client: true,
       search_type_list: [
         {
           value: 0,
@@ -201,7 +205,8 @@ export default Vue.extend({
       total: 1,
       list: [],
       date: [],
-      type: 'null'
+      type: 'null',
+      user_info: JSON.parse(window.localStorage.getItem('userInfo') as string)
     }
   },
   methods: {
@@ -317,9 +322,6 @@ export default Vue.extend({
       this.client_list = res[0].data.data
       this.user_list = res[1].data.data
     })
-    if (JSON.parse(window.localStorage.getItem('userInfo') as string).type === 4) {
-      this.show_client = false
-    }
   }
 })
 </script>

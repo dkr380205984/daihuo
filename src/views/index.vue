@@ -153,25 +153,6 @@ export default Vue.extend({
           icon: 'iconchanpinguanli'
         },
         {
-          name: '平台库存管理',
-          url: '/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0',
-          // icon: require('@/assets/image/index/库存管理.png')
-          // iconFontName: 'iconkucunguanli',
-          icon: 'iconkucunguanli'
-        },
-        {
-          name: '供货商库存管理',
-          url: '/supplierStore/list',
-          icon: 'iconkucunguanli'
-        },
-        {
-          name: '出入库日志',
-          url: '/store/logList/page=1&&keyword=&&date=&&type=&&search_type=0&&store_id=',
-          // icon: require('@/assets/image/index/出入库日志.png')
-          // iconFontName: 'iconchurukurizhi',
-          icon: 'iconchurukurizhi'
-        },
-        {
           name: '订单管理',
           url: '/order/list/page=1&&keyword=&&date=&&type=0',
           // icon: require('@/assets/image/index/订单管理.png')
@@ -179,11 +160,11 @@ export default Vue.extend({
           icon: 'icondingdanguanli'
         },
         {
-          name: '品类设置',
-          url: '/setting/category/page=1&&keyword=',
-          // icon: require('@/assets/image/index/品类设置.png')
-          // iconFontName: 'iconpinleishezhi',
-          icon: 'iconpinleishezhi'
+          name: '平台库存管理',
+          url: '/store/list/page=1&&keyword=&&date=&&client_id=&&user_id=&&type=0',
+          // icon: require('@/assets/image/index/库存管理.png')
+          // iconFontName: 'iconkucunguanli',
+          icon: 'iconkucunguanli'
         },
         {
           name: '系统设置',

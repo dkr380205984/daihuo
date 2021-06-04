@@ -26,7 +26,8 @@
               <div class="label">产品品牌：</div>
               <div class="text">{{product_brand||'暂无品牌'}}</div>
             </div>
-            <div class="colCtn flex3">
+            <div class="colCtn flex3"
+              v-if="user_info.type===1">
               <div class="label">供货商：</div>
               <div class="text">{{from_client||'暂无供货商'}}</div>
             </div>
@@ -76,7 +77,7 @@
                         style="min-width:150px"
                         v-for="(itemChild,indexChild) in table_data.header"
                         :key="indexChild">
-                        <span v-if="itemChild!=='图片'">{{item[itemChild]}}
+                        <span v-if="itemChild!=='图片'">{{itemChild==='成本价'?user_info.type===1||user_info.type===4?item[itemChild]:'***':item[itemChild]}}
                           <span style="cursor:pointer;color:#1a95ff"
                             v-if="indexChild===0"
                             @click="goPrint(item[itemChild])">（打印）</span>
@@ -156,7 +157,8 @@
           <div class="title">
             <span class="left">产品库存</span>
             <span class="right"
-              @click="getLog($route.params.id)">查看全部</span>
+              @click="getLog($route.params.id)"
+              v-if="user_info.type===4||user_info.type===1">查看全部</span>
           </div>
           <div class="content">
             <div class="label">库存数量</div>
@@ -173,7 +175,8 @@
         <div class="btnCtn">
           <div class="btn btnGray"
             @click="$router.go(-1)">返回</div>
-          <div class="btn btnOrange"
+          <div v-if="user_info.type===1||user_info.type===4"
+            class="btn btnOrange"
             @click="$router.push('/product/update/' + $route.params.id)">修改</div>
         </div>
       </div>
@@ -405,7 +408,8 @@ export default Vue.extend({
       printInfo: {
         type: 1,
         number: ''
-      }
+      },
+      user_info: JSON.parse(window.localStorage.getItem('userInfo') as string)
     }
   },
   methods: {
@@ -423,13 +427,11 @@ export default Vue.extend({
         const sku = 'sku编码'
         const onlinePrice = '线上价'
         const offlinePrice = '线下价'
+        const price = '零售价'
         obj[sku] = item.sku_code
-        if (!obj[onlinePrice]) {
-          obj[onlinePrice] = item.price_online
-        }
-        if (!obj[offlinePrice]) {
-          obj[offlinePrice] = item.price_offline
-        }
+        obj[onlinePrice] = item.price_online
+        obj[offlinePrice] = item.price_offline
+        obj[price] = item.price
         return obj
       })
       const sortRule = ['sku编码', '配色', '图片', '零售价', '成本价', '线上价', '线下价'].reverse()

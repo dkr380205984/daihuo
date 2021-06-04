@@ -316,14 +316,14 @@ export default Vue.extend({
   },
   methods: {
     inputEvent(e: any, name: any, item: any, itemName: any) {
-      if (name !== '零售价') {
+      if (name !== '线上价') {
         this.$forceUpdate()
         return
       } else {
-        const onlinePrice = '线上价'
+        const onlinePrice = '零售价'
         const offlinePrice = '线下价'
         item[onlinePrice] = Math.ceil(item[itemName] / 0.38)
-        item[offlinePrice] = Math.ceil(item[itemName] / 0.45)
+        item[offlinePrice] = Math.ceil(item[onlinePrice] * 0.45)
         this.$forceUpdate()
       }
     },
@@ -397,7 +397,7 @@ export default Vue.extend({
           {
             is_combine: false,
             is_required: true,
-            name: '零售价'
+            name: '线上价'
           },
           {
             is_combine: false,
@@ -407,7 +407,7 @@ export default Vue.extend({
           {
             is_combine: false,
             is_required: true,
-            name: '线上价'
+            name: '零售价'
           },
           {
             is_combine: false,
